@@ -58,6 +58,13 @@
         reps.style.transition = 'none'; reps.style.opacity = '0';
         void slk1.offsetWidth; /* flush so the next transitions animate */
       }
+      function prepop() {
+        /* first half of the External chat is pre-populated (client request) */
+        [0, 1].forEach(function (k) { var u = SE.units[k]; u.style.opacity = '1'; u.style.transform = 'translateY(0)'; });
+        eFiles[0].style.opacity = '1'; eFiles[0].style.transform = 'scale(1)';
+        SE.msgs.style.transform = 'translate3d(0,' + suffix(SE, 1) + 'px,0)';
+        void slk1.offsetWidth;
+      }
       function reveal(C, k) {
         C.msgs.style.transition = 'transform .55s cubic-bezier(.22,1,.36,1)';
         C.msgs.style.transform = 'translate3d(0,' + suffix(C, k) + 'px,0)';
@@ -78,12 +85,9 @@
       function slkStart() {
         if (slkRunning) return; slkRunning = true;
         resetAll();
+        prepop();
         var steps = [
-          [500, function () { reveal(SE, 0); }],
-          [SSTEP * 0.8, function () { typingOn(SE); }],
-          [850, function () { typingOff(SE); reveal(SE, 1); }],
-          [380, function () { popEl(eFiles[0]); }],
-          [SSTEP, function () { reveal(SE, 2); }],
+          [600, function () { reveal(SE, 2); }],
           [SSTEP * 0.8, function () { typingOn(SE); }],
           [850, function () { typingOff(SE); reveal(SE, 3); }],
           [380, function () { popEl(eFiles[1]); }],
@@ -102,8 +106,9 @@
             SE.msgs.style.transition = SI.msgs.style.transition = 'opacity .35s ease';
             SE.msgs.style.opacity = SI.msgs.style.opacity = '0';
           }],
-          [420, function () {
+          [380, function () {
             resetAll();
+            prepop();
             SE.msgs.style.opacity = SI.msgs.style.opacity = '1';
             slkRunning = false; slkStart();
           }]
