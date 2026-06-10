@@ -1,5 +1,10 @@
 /* Disro organigram FX — GitHub-served (push to main = live on next page load) — agents marquee (right-to-left) + humans spring stepper (left-to-right) */
 (function () {
+  /* Lato for the Slack section mockup (dslk) */
+  var l = document.createElement('link');
+  l.rel = 'stylesheet';
+  l.href = 'https://fonts.googleapis.com/css2?family=Lato:wght@400;500;700;800;900&display=swap';
+  document.head.appendChild(l);
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function ready(f) { if (document.readyState !== 'loading') f(); else document.addEventListener('DOMContentLoaded', f); }
   ready(function () {
