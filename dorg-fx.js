@@ -1,4 +1,4 @@
-/* Disro organigram FX v10 (v9 + hides legacy mobile PNG on published site) — agents marquee (right-to-left) + humans spring stepper (left-to-right) */
+/* Disro organigram FX — GitHub-served (push to main = live on next page load) — agents marquee (right-to-left) + humans spring stepper (left-to-right) */
 (function () {
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function ready(f) { if (document.readyState !== 'loading') f(); else document.addEventListener('DOMContentLoaded', f); }
