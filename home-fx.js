@@ -4,7 +4,7 @@
    a filename here and push. */
 (function () {
   var BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/main/home/';
-  ['fonts.js', 'organigram.js', 'shine.js', 'slack.js'].forEach(function (f) {
+  ['fonts.js', 'organigram.js', 'shine.js', 'slack.js', 'cortex.js'].forEach(function (f) {
     fetch(BASE + f + '?cb=' + Date.now()).then(function (r) { return r.text(); }).then(function (t) {
       var s = document.createElement('script');
       s.textContent = t;
