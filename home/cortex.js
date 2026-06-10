@@ -72,8 +72,8 @@
     }
     function resetAll() {
       panelInit(menu); panelInit(models);
-      menu.style.right = '119px';          /* menu opens alone, aligned to the trigger */
-      models.style.right = '119px';
+      menu.style.right = '95px';           /* menu opens alone, aligned to the trigger (composer-relative) */
+      models.style.right = '95px';
       msgInit(prow); msgInit(resp);
       if (file) { file.style.transition = 'none'; file.style.opacity = '0'; file.style.transform = 'scale(.96)'; }
       triggerT.textContent = 'Sonnet 4.6';
@@ -92,7 +92,7 @@
         [850, function () { clickPulse(); }],
         [180, function () {
           menu.style.transition = 'right .4s cubic-bezier(.25,.8,.3,1)';
-          menu.style.right = '376px';      /* slide aside, list opens aligned to the trigger */
+          menu.style.right = '352px';      /* slide aside, list opens aligned to the trigger */
           panelShow(models);
         }],
         [750, function () { moveTo(opus, 10, 2); }],
