@@ -65,15 +65,20 @@
       el.style.opacity = '1'; el.style.transform = 'translateY(0)';
     }
 
+    var composer = chat.querySelector('.dcx-composer');
     var timer = null, running = false;
     function runSteps(steps, i) {
       if (i >= steps.length) return;
       timer = setTimeout(function () { steps[i][1](); runSteps(steps, i + 1); }, steps[i][0] * PACE);
     }
+    var mob = false, R1 = '95px', R2 = '352px';
     function resetAll() {
+      mob = composer && composer.offsetWidth < 420;
+      R1 = mob ? '12px' : '95px';
+      R2 = mob ? '12px' : '352px';
       panelInit(menu); panelInit(models);
-      menu.style.right = '95px';           /* menu opens alone, aligned to the trigger (composer-relative) */
-      models.style.right = '95px';
+      menu.style.right = R1;               /* menu opens alone, aligned to the trigger (composer-relative) */
+      models.style.right = R1;
       msgInit(prow); msgInit(resp);
       if (file) { file.style.transition = 'none'; file.style.opacity = '0'; file.style.transform = 'scale(.96)'; }
       triggerT.textContent = 'Sonnet 4.6';
@@ -91,8 +96,12 @@
         [700, function () { moveTo(moreRow, 30, 2); }],
         [850, function () { clickPulse(); }],
         [180, function () {
-          menu.style.transition = 'right .4s cubic-bezier(.25,.8,.3,1)';
-          menu.style.right = '352px';      /* slide aside, list opens aligned to the trigger */
+          if (mob) {
+            panelHide(menu);               /* no room side-by-side on mobile */
+          } else {
+            menu.style.transition = 'right .4s cubic-bezier(.25,.8,.3,1)';
+            menu.style.right = R2;         /* slide aside, list opens aligned to the trigger */
+          }
           panelShow(models);
         }],
         [750, function () { moveTo(opus, 10, 2); }],
