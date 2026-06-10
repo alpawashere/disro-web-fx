@@ -46,18 +46,19 @@
     function panelInit(p) {
       p.style.transition = 'none';
       p.style.opacity = '0';
-      p.style.transform = 'scale(.95)';
+      p.style.transform = 'translateX(0) scale(.95)';
       p.style.transformOrigin = '100% 100%';
+      p.style.willChange = 'transform, opacity';
     }
     function panelShow(p) {
       p.style.transition = 'opacity .25s ease, transform .3s cubic-bezier(.2,.9,.3,1.15)';
       p.style.opacity = '1';
-      p.style.transform = 'scale(1)';
+      p.style.transform = 'translateX(0) scale(1)';
     }
-    function panelHide(p) {
+    function panelHide(p, tx) {
       p.style.transition = 'opacity .22s ease, transform .22s ease';
       p.style.opacity = '0';
-      p.style.transform = 'scale(.96)';
+      p.style.transform = (tx || 'translateX(0)') + ' scale(.96)';
     }
     function msgInit(el) { el.style.transition = 'none'; el.style.opacity = '0'; el.style.transform = 'translateY(10px)'; }
     function msgShow(el) {
@@ -71,11 +72,10 @@
       if (i >= steps.length) return;
       timer = setTimeout(function () { steps[i][1](); runSteps(steps, i + 1); }, steps[i][0] * PACE);
     }
-    var mob = false, R1 = '95px', R2 = '352px';
+    var mob = false, R1 = '95px';
     function resetAll() {
       mob = composer && composer.offsetWidth < 420;
       R1 = mob ? '12px' : '95px';
-      R2 = mob ? '12px' : '352px';
       panelInit(menu); panelInit(models);
       menu.style.right = R1;               /* menu opens alone, aligned to the trigger (composer-relative) */
       models.style.right = R1;
@@ -99,14 +99,14 @@
           if (mob) {
             panelHide(menu);               /* no room side-by-side on mobile */
           } else {
-            menu.style.transition = 'right .4s cubic-bezier(.25,.8,.3,1)';
-            menu.style.right = R2;         /* slide aside, list opens aligned to the trigger */
+            menu.style.transition = 'transform .4s cubic-bezier(.25,.8,.3,1)';
+            menu.style.transform = 'translateX(-257px) scale(1)'; /* slide aside via transform (no layout work) */
           }
           panelShow(models);
         }],
         [750, function () { moveTo(opus, 10, 2); }],
         [850, function () { clickPulse(); opus.style.transition = 'background-color .15s ease'; opus.style.backgroundColor = '#f2f2f0'; }],
-        [320, function () { panelHide(menu); panelHide(models); triggerT.textContent = 'Opus 4.8'; }],
+        [320, function () { panelHide(menu, mob ? null : 'translateX(-257px)'); panelHide(models); triggerT.textContent = 'Opus 4.8'; }],
         [450, function () { cur.style.opacity = '0'; }],
         [450, function () { msgShow(prow); }],
         [950, function () { msgShow(resp); }],
