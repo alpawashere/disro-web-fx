@@ -8,7 +8,11 @@ Each file here is fetched at runtime by a tiny inline loader registered on the W
 
 | File | What it drives | Where it's applied |
 |---|---|---|
-| `home-fx.js` | "Every agent is a hire" organigram (agents marquee, humans spring stepper, chrome title shine) + Slack section conversation loop + Lato font loading | Home page footer loader |
+| `home-fx.js` | Manifest — fetches each module below as its own `<script>` (error isolation) | Home page footer loader |
+| `home/fonts.js` | Lato font loading for the Slack mockup | via manifest |
+| `home/organigram.js` | "Every agent is a hire" — agents marquee + humans spring stepper | via manifest |
+| `home/shine.js` | Chrome reflection sweep on the section title | via manifest |
+| `home/slack.js` | Slack section conversation loop (typing bubbles, infinite replay) | via manifest |
 
 ## Workflow
 
