@@ -8,7 +8,7 @@ Each file here is fetched at runtime by a tiny inline loader registered on the W
 
 | File | What it drives | Where it's applied |
 |---|---|---|
-| `dorg-fx.js` | "Every agent is a hire" organigram — agents marquee, humans spring stepper, chrome title shine | Home page footer loader |
+| `dorg-fx.js` | "Every agent is a hire" organigram (agents marquee, humans spring stepper, chrome title shine) + Slack section conversation loop + Lato font loading | Home page footer loader |
 
 ## Workflow
 
@@ -30,3 +30,10 @@ Set as custom attributes on the `dorg` element in the Webflow Designer:
 | `data-dorg-shine-delay` | 2000 | title shine delay after section enters view (ms) |
 | `data-dorg-shine-ms` | 750 | title shine sweep duration (ms) |
 | `data-dorg-shine-repeat` | 10000 | title shine repeat interval while in view (ms) |
+
+Set as custom attributes on the `dslk` element (Slack section):
+
+| Attribute | Default | Meaning |
+|---|---|---|
+| `data-dslk-step` | 950 | base gap between message reveals (ms) |
+| `data-dslk-hold` | 4000 | hold on the finished conversation before wipe + replay (ms) |
