@@ -122,8 +122,14 @@
     function stop() { clearTimeout(timer); running = false; }
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (es) {
-        es.forEach(function (e) { if (e.isIntersecting) start(); else stop(); });
-      }, { threshold: 0.35 }).observe(root);
+        es.forEach(function (e) {
+          /* start at >=0.35 visible; stop ONLY when fully out of view.
+             Mobile URL-bar resizes flap the ratio around the threshold — resetting on
+             partial exit caused visible jumps mid-view. */
+          if (e.isIntersecting && e.intersectionRatio >= 0.35) { start(); }
+          else if (!e.isIntersecting) { stop(); }
+        });
+      }, { threshold: [0, 0.35] }).observe(root);
     } else { start(); }
   });
 })();

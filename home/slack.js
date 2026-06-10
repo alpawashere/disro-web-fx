@@ -119,12 +119,13 @@
       if ('IntersectionObserver' in window) {
         new IntersectionObserver(function (es) {
           es.forEach(function (e) {
-            if (e.isIntersecting) {
+            /* start at >=0.3 visible; stop ONLY when fully out (mobile URL-bar resizes flap the ratio) */
+            if (e.isIntersecting && e.intersectionRatio >= 0.3) {
               if (document.fonts && document.fonts.ready) { document.fonts.ready.then(function () { slkStart(); }); }
               else slkStart();
-            } else { slkStop(); }
+            } else if (!e.isIntersecting) { slkStop(); }
           });
-        }, { threshold: 0.3 }).observe(slkRoot);
+        }, { threshold: [0, 0.3] }).observe(slkRoot);
       } else { slkStart(); }
     }
   });

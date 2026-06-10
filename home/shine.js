@@ -28,7 +28,8 @@
       });
       new IntersectionObserver(function (es) {
         es.forEach(function (e) {
-          if (e.isIntersecting && !visible) {
+          /* arm at >=0.35 visible; disarm ONLY when fully out (mobile URL-bar resizes flap the ratio) */
+          if (e.isIntersecting && e.intersectionRatio >= 0.35 && !visible) {
             visible = true;
             shineTimer = setTimeout(fire, SHINE_DELAY);
           } else if (!e.isIntersecting && visible) {
@@ -37,7 +38,7 @@
             title.classList.remove('dorg-shine-run');
           }
         });
-      }, { threshold: 0.35 }).observe(sec);
+      }, { threshold: [0, 0.35] }).observe(sec);
     }
   });
 })();
