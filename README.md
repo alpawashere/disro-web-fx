@@ -8,7 +8,7 @@ Each file here is fetched at runtime by a tiny inline loader registered on the W
 
 | File | What it drives | Where it's applied |
 |---|---|---|
-| `dorg-fx.js` | "Every agent is a hire" organigram (agents marquee, humans spring stepper, chrome title shine) + Slack section conversation loop + Lato font loading | Home page footer loader |
+| `home-fx.js` | "Every agent is a hire" organigram (agents marquee, humans spring stepper, chrome title shine) + Slack section conversation loop + Lato font loading | Home page footer loader |
 
 ## Workflow
 
