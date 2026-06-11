@@ -65,7 +65,7 @@
       for (var i = 0; i < 3; i++) applyTo(cards[i], SLOTS[idx[i]]);
     }
 
-    var FLIGHT_MS = 760;
+    var FLIGHT_MS = 1150;
 
     function step() {
       var frontI = idx.indexOf(2);
@@ -84,14 +84,14 @@
           backgroundColor: 'rgba(255,255,255,0.99)',
           easing: 'cubic-bezier(0.5, 0, 0.9, 0.6)' },
         { transform: 'translate(-50%, 110px) scale(1.05)', filter: 'blur(0.3px)',
-          backgroundColor: 'rgba(252,252,252,0.99)', offset: 0.36,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+          backgroundColor: 'rgba(252,252,252,0.99)', offset: 0.24,
+          easing: 'cubic-bezier(0.19, 1, 0.22, 1)' },
         { transform: 'translate(-50%, 0px) scale(0.739)', filter: 'blur(2px)',
           backgroundColor: 'rgba(237,237,237,0.99)' }
       ], { duration: FLIGHT_MS }).onfinish = function () {
         c.style.transition = '';
       };
-      setTimeout(function () { c.style.zIndex = 1; }, FLIGHT_MS * 0.42);
+      setTimeout(function () { c.style.zIndex = 1; }, FLIGHT_MS * 0.3);
 
       // Advancing cards step forward on the CSS transition, slightly delayed
       // so the dip reads first.
