@@ -54,21 +54,52 @@
     ];
     var idx = [0, 1, 2]; // card i currently occupies slot idx[i]
 
-    function apply() {
-      for (var i = 0; i < 3; i++) {
-        var sl = SLOTS[idx[i]];
-        var c = cards[i];
-        c.style.transform = 'translate(-50%, ' + sl.y + 'px) scale(' + sl.s + ')';
-        c.style.filter = sl.b ? 'blur(' + sl.b + 'px)' : 'none';
-        c.style.backgroundColor = sl.bg;
-        c.style.zIndex = sl.z;
-      }
+    function applyTo(c, sl) {
+      c.style.transform = 'translate(-50%, ' + sl.y + 'px) scale(' + sl.s + ')';
+      c.style.filter = sl.b ? 'blur(' + sl.b + 'px)' : 'none';
+      c.style.backgroundColor = sl.bg;
+      c.style.zIndex = sl.z;
     }
 
+    function apply() {
+      for (var i = 0; i < 3; i++) applyTo(cards[i], SLOTS[idx[i]]);
+    }
+
+    var FLIGHT_MS = 760;
+
     function step() {
+      var frontI = idx.indexOf(2);
       // front (2) -> back (0), back (0) -> middle (1), middle (1) -> front (2)
       idx = idx.map(function (v) { return (v + 1) % 3; });
-      apply();
+
+      /* Receding card: dive down in a fast arc (still on top), then shoot up
+         to the back slot decelerating hard. zIndex flips mid-flight so it
+         passes behind the advancing cards on the way up. */
+      var c = cards[frontI];
+      c.style.transition = 'none';
+      applyTo(c, SLOTS[0]);
+      c.style.zIndex = 3;
+      c.animate([
+        { transform: 'translate(-50%, 61px) scale(1)', filter: 'blur(0px)',
+          backgroundColor: 'rgba(255,255,255,0.99)',
+          easing: 'cubic-bezier(0.5, 0, 0.9, 0.6)' },
+        { transform: 'translate(-50%, 110px) scale(1.05)', filter: 'blur(0.3px)',
+          backgroundColor: 'rgba(252,252,252,0.99)', offset: 0.36,
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+        { transform: 'translate(-50%, 0px) scale(0.739)', filter: 'blur(2px)',
+          backgroundColor: 'rgba(237,237,237,0.99)' }
+      ], { duration: FLIGHT_MS }).onfinish = function () {
+        c.style.transition = '';
+      };
+      setTimeout(function () { c.style.zIndex = 1; }, FLIGHT_MS * 0.42);
+
+      // Advancing cards step forward on the CSS transition, slightly delayed
+      // so the dip reads first.
+      setTimeout(function () {
+        for (var i = 0; i < 3; i++) {
+          if (i !== frontI) applyTo(cards[i], SLOTS[idx[i]]);
+        }
+      }, 140);
     }
 
     var timer = null;
