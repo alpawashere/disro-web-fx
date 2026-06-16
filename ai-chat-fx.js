@@ -34,15 +34,13 @@
     document.head.appendChild(style);
 
     var slots = [
-      { x: -2,    y: 300, size: 54,  r: 14, s: 0.62, o: 0 },
       { x: 8.47,  y: 258, size: 64,  r: 16, s: 0.72, o: 0.42 },
       { x: 17.45, y: 131, size: 70,  r: 18, s: 0.82, o: 0.68 },
       { x: 30.8,  y: 36,  size: 88,  r: 22, s: 0.94, o: 0.88 },
       { x: 50,    y: 0,   size: 100, r: 25, s: 1.16, o: 1 },
       { x: 62.85, y: 36,  size: 88,  r: 22, s: 0.94, o: 0.88 },
       { x: 77.52, y: 131, size: 70,  r: 18, s: 0.82, o: 0.68 },
-      { x: 86.86, y: 258, size: 64,  r: 16, s: 0.72, o: 0.42 },
-      { x: 98,    y: 300, size: 54,  r: 14, s: 0.62, o: 0 }
+      { x: 86.86, y: 258, size: 64,  r: 16, s: 0.72, o: 0.42 }
     ];
 
     function makeAgent(src) {
@@ -69,13 +67,13 @@
     for (var i = 0; i < originals.length; i++) originals[i].style.opacity = '0';
 
     var nodes = [];
-    var nextItem = 9;
+    var nextItem = 7;
 
     function applyNode(node, animate) {
-      var pathIndex = node._pathIndex;
-      var slot = slots[pathIndex];
+      var slotIndex = node._slotIndex;
+      var slot = slots[slotIndex];
       node.style.transition = animate
-        ? 'left 980ms cubic-bezier(0.19,1,0.22,1), top 980ms cubic-bezier(0.19,1,0.22,1), width 980ms cubic-bezier(0.19,1,0.22,1), height 980ms cubic-bezier(0.19,1,0.22,1), border-radius 980ms cubic-bezier(0.19,1,0.22,1), transform 980ms cubic-bezier(0.19,1,0.22,1), opacity 520ms ease'
+        ? 'left 680ms cubic-bezier(0.22,1,0.36,1), top 680ms cubic-bezier(0.22,1,0.36,1), width 680ms cubic-bezier(0.22,1,0.36,1), height 680ms cubic-bezier(0.22,1,0.36,1), border-radius 680ms cubic-bezier(0.22,1,0.36,1), transform 680ms cubic-bezier(0.22,1,0.36,1), opacity 260ms ease'
         : 'none';
       node.style.left = slot.x + '%';
       node.style.top = slot.y + 'px';
@@ -83,7 +81,7 @@
       node.style.height = slot.size + 'px';
       node.style.borderRadius = slot.r + 'px';
       node.style.opacity = slot.o;
-      node.style.zIndex = String(30 - Math.abs(pathIndex - 4));
+      node.style.zIndex = String(30 - Math.abs(slotIndex - 3));
       node.style.transform = 'translateX(-50%) scale(' + slot.s + ')';
     }
 
@@ -99,9 +97,9 @@
     var moving = false;
 
     function applyInstant() {
-      for (var i = 0; i < 9; i++) {
+      for (var i = 0; i < slots.length; i++) {
         var el = document.createElement('div');
-        el._pathIndex = i;
+        el._slotIndex = i;
         setItem(el, i);
         host.appendChild(el);
         nodes.push(el);
@@ -114,22 +112,35 @@
       moving = true;
       var recycler = null;
       for (var i = 0; i < nodes.length; i++) {
-        if (nodes[i]._pathIndex === 8) recycler = nodes[i];
+        if (nodes[i]._slotIndex === slots.length - 1) recycler = nodes[i];
       }
-      if (recycler) {
-        recycler._pathIndex = 0;
+
+      recycler.style.transition = 'opacity 220ms ease';
+      recycler.style.opacity = '0';
+
+      setTimeout(function () {
+        recycler._slotIndex = 0;
         setItem(recycler, nextItem);
         nextItem++;
         applyNode(recycler, false);
-      }
-      host.offsetHeight;
-      for (var i = 0; i < nodes.length; i++) {
-        nodes[i]._pathIndex += 1;
-        applyNode(nodes[i], true);
-      }
-      setTimeout(function () {
-        moving = false;
-      }, 1040);
+        recycler.style.opacity = '0';
+
+        host.offsetHeight;
+
+        for (var i = 0; i < nodes.length; i++) {
+          if (nodes[i] !== recycler) {
+            nodes[i]._slotIndex += 1;
+            applyNode(nodes[i], true);
+          }
+        }
+
+        recycler.style.transition = 'opacity 260ms ease';
+        recycler.style.opacity = String(slots[0].o);
+
+        setTimeout(function () {
+          moving = false;
+        }, 720);
+      }, 240);
     }
 
     function start() {
