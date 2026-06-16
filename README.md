@@ -13,6 +13,8 @@ Each file here is fetched at runtime by a tiny inline loader registered on the W
 | `home/organigram.js` | "Every agent is a hire" — agents marquee + humans spring stepper | via manifest |
 | `home/shine.js` | Chrome reflection sweep on the section title | via manifest |
 | `home/slack.js` | Slack section conversation loop (typing bubbles, infinite replay) | via manifest |
+| `cortex-fx.js` | Manifest for Cortex page animations | Cortex page footer loader |
+| `cortex/hero.js` | Cortex hero core pulse + orbit activation | via Cortex manifest |
 
 ## Workflow
 
