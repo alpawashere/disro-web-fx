@@ -393,9 +393,6 @@
             setLabel(cards[i], topics[nextTopic % topics.length]);
             nextTopic++;
             applyCard(cards[i], slots[positions[i]], false);
-            cards[i].offsetHeight;
-            positions[i] = 3;
-            applyCard(cards[i], slots[positions[i]], true);
           }
         }
       }, 820);
