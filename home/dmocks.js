@@ -328,14 +328,13 @@
     ];
     if (!fixed || !cards[0] || !cards[1] || !cards[2]) return;
     stage.setAttribute('data-dmk3-fx', 'true');
-    cards.push(cards[2].cloneNode(true));
-    stage.appendChild(cards[3]);
+    var cardTemplate = cards[2].cloneNode(true);
 
     var topics = [
       'Emails', 'Social Media', 'Meta Ads', 'SEO', 'Sales', 'ROAS',
       "SOP's", 'Paid Search', 'CRO', 'Lifecycle', 'Retention', 'Landing Pages'
     ];
-    var nextTopic = 4;
+    var nextTopic = 3;
     var slots = [
       { top: 33,  opacity: 0, scale: 0.94, blur: 2 },
       { top: 73,  opacity: 1, scale: 0.97, blur: 0 },
@@ -345,8 +344,8 @@
     ];
     var baseTransform = 'translateX(-50%) rotate(-15deg) skewX(15deg) scaleY(.97)';
     var timer = null;
-    var recycleTimer = null;
-    var positions = [1, 2, 3, 4];
+    var removeTimer = null;
+    var items = [];
 
     fixed.style.zIndex = '6';
     fixed.style.pointerEvents = 'none';
@@ -375,26 +374,42 @@
     function reset() {
       for (var i = 0; i < cards.length; i++) {
         setLabel(cards[i], topics[i]);
-        positions[i] = i + 1;
-        applyCard(cards[i], slots[positions[i]], false);
+        items[i] = { el: cards[i], pos: i + 1 };
+        applyCard(items[i].el, slots[items[i].pos], false);
       }
     }
 
+    function createBottomCard() {
+      var card = cardTemplate.cloneNode(true);
+      var movingLogo = card.querySelector('.dmk3-logo');
+      if (movingLogo) movingLogo.style.display = 'none';
+      setLabel(card, topics[nextTopic % topics.length]);
+      nextTopic++;
+      stage.appendChild(card);
+      var item = { el: card, pos: 4 };
+      applyCard(item.el, slots[item.pos], false);
+      items.push(item);
+      return item;
+    }
+
     function step() {
-      for (var i = 0; i < cards.length; i++) {
-        positions[i] -= 1;
-        applyCard(cards[i], slots[positions[i]], true);
+      createBottomCard();
+      stage.offsetHeight;
+      for (var i = 0; i < items.length; i++) {
+        items[i].pos -= 1;
+        applyCard(items[i].el, slots[items[i].pos], true);
       }
 
-      recycleTimer = setTimeout(function () {
-        for (var i = 0; i < cards.length; i++) {
-          if (positions[i] === 0) {
-            positions[i] = 4;
-            setLabel(cards[i], topics[nextTopic % topics.length]);
-            nextTopic++;
-            applyCard(cards[i], slots[positions[i]], false);
+      removeTimer = setTimeout(function () {
+        var kept = [];
+        for (var i = 0; i < items.length; i++) {
+          if (items[i].pos === 0) {
+            if (items[i].el.parentNode) items[i].el.parentNode.removeChild(items[i].el);
+          } else {
+            kept.push(items[i]);
           }
         }
+        items = kept;
       }, 820);
     }
 
@@ -410,9 +425,9 @@
       if (!timer) return;
       clearInterval(timer);
       timer = null;
-      if (recycleTimer) {
-        clearTimeout(recycleTimer);
-        recycleTimer = null;
+      if (removeTimer) {
+        clearTimeout(removeTimer);
+        removeTimer = null;
       }
     }
 
