@@ -338,10 +338,10 @@
     var nextTopic = 4;
     var slots = [
       { top: 33,  opacity: 0, scale: 0.94, blur: 2 },
-      { top: 98,  opacity: 1, scale: 0.97, blur: 0 },
-      { top: 137, opacity: 1, scale: 0.99, blur: 0 },
-      { top: 176, opacity: 1, scale: 1,    blur: 0 },
-      { top: 216, opacity: 0, scale: 1.02, blur: 0 }
+      { top: 73,  opacity: 1, scale: 0.97, blur: 0 },
+      { top: 112, opacity: 1, scale: 0.99, blur: 0 },
+      { top: 153, opacity: 1, scale: 1,    blur: 0 },
+      { top: 194, opacity: 0, scale: 1.02, blur: 0 }
     ];
     var baseTransform = 'translateX(-50%) rotate(-15deg) skewX(15deg) scaleY(.97)';
     var timer = null;
