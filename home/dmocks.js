@@ -311,13 +311,126 @@
     }, { threshold: [0, 0.35] }).observe(box);
   }
 
+  /* dmk3 cascade — Disro stays fixed at the top while topic cards step upward
+     and disappear underneath it, then recycle with new agency terms. */
+  function initDmk3Cycle() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var box = document.querySelector('.dmk3');
+    if (!box) return;
+    var stage = box.querySelector('.dmk3-stage');
+    if (!stage || stage.getAttribute('data-dmk3-fx') === 'true') return;
+
+    var fixed = stage.querySelector('.dmk3-b1');
+    var cards = [
+      stage.querySelector('.dmk3-b2'),
+      stage.querySelector('.dmk3-b3'),
+      stage.querySelector('.dmk3-b4')
+    ];
+    if (!fixed || !cards[0] || !cards[1] || !cards[2]) return;
+    stage.setAttribute('data-dmk3-fx', 'true');
+
+    var topics = [
+      'Emails', 'Social Media', 'Meta Ads', 'SEO', 'Sales', 'ROAS',
+      "SOP's", 'Paid Search', 'CRO', 'Lifecycle', 'Retention', 'Landing Pages'
+    ];
+    var nextTopic = 3;
+    var slots = [
+      { top: 33,  opacity: 0,    scale: 0.94, blur: 2 },
+      { top: 73,  opacity: 0.72, scale: 0.97, blur: 0.6 },
+      { top: 112, opacity: 0.9,  scale: 0.99, blur: 0 },
+      { top: 153, opacity: 1,    scale: 1,    blur: 0 },
+      { top: 194, opacity: 0,    scale: 1.02, blur: 1 }
+    ];
+    var baseTransform = 'translateX(-50%) rotate(-15deg) skewX(15deg) scaleY(.97)';
+    var timer = null;
+    var recycleTimer = null;
+    var positions = [1, 2, 3];
+
+    fixed.style.zIndex = '6';
+    fixed.style.pointerEvents = 'none';
+
+    function setLabel(card, text) {
+      var label = card.querySelector('.dmk3-lab');
+      if (label) label.textContent = text;
+    }
+
+    function applyCard(card, slot, animate) {
+      card.style.transition = animate
+        ? 'top 760ms cubic-bezier(0.19, 1, 0.22, 1), opacity 520ms ease, transform 760ms cubic-bezier(0.19, 1, 0.22, 1), filter 520ms ease'
+        : 'none';
+      card.style.top = slot.top + 'px';
+      card.style.opacity = slot.opacity;
+      card.style.transform = baseTransform + ' scale(' + slot.scale + ')';
+      card.style.filter = slot.blur ? 'blur(' + slot.blur + 'px)' : 'none';
+      card.style.zIndex = '2';
+      card.style.pointerEvents = 'none';
+    }
+
+    function reset() {
+      for (var i = 0; i < cards.length; i++) {
+        setLabel(cards[i], topics[i]);
+        positions[i] = i + 1;
+        applyCard(cards[i], slots[positions[i]], false);
+      }
+    }
+
+    function step() {
+      for (var i = 0; i < cards.length; i++) {
+        positions[i] -= 1;
+        applyCard(cards[i], slots[positions[i]], true);
+      }
+
+      recycleTimer = setTimeout(function () {
+        for (var i = 0; i < cards.length; i++) {
+          if (positions[i] === 0) {
+            positions[i] = 4;
+            setLabel(cards[i], topics[nextTopic % topics.length]);
+            nextTopic++;
+            applyCard(cards[i], slots[positions[i]], false);
+            cards[i].offsetHeight;
+            positions[i] = 3;
+            applyCard(cards[i], slots[positions[i]], true);
+          }
+        }
+      }, 820);
+    }
+
+    function start() {
+      if (timer) return;
+      step();
+      timer = setInterval(step, 1600);
+    }
+
+    function stop() {
+      if (!timer) return;
+      clearInterval(timer);
+      timer = null;
+      if (recycleTimer) {
+        clearTimeout(recycleTimer);
+        recycleTimer = null;
+      }
+    }
+
+    reset();
+
+    new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        var e = entries[i];
+        if (!e.isIntersecting) stop();
+        else if (e.intersectionRatio >= 0.35) start();
+      }
+    }, { threshold: [0, 0.35] }).observe(box);
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
       initStackCycle();
       initDmk2Cycle();
+      initDmk3Cycle();
     });
   } else {
     initStackCycle();
     initDmk2Cycle();
+    initDmk3Cycle();
   }
 })();
