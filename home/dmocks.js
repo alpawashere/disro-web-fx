@@ -328,23 +328,25 @@
     ];
     if (!fixed || !cards[0] || !cards[1] || !cards[2]) return;
     stage.setAttribute('data-dmk3-fx', 'true');
+    cards.push(cards[2].cloneNode(true));
+    stage.appendChild(cards[3]);
 
     var topics = [
       'Emails', 'Social Media', 'Meta Ads', 'SEO', 'Sales', 'ROAS',
       "SOP's", 'Paid Search', 'CRO', 'Lifecycle', 'Retention', 'Landing Pages'
     ];
-    var nextTopic = 3;
+    var nextTopic = 4;
     var slots = [
       { top: 33,  opacity: 0,    scale: 0.94, blur: 2 },
-      { top: 73,  opacity: 0.72, scale: 0.97, blur: 0.6 },
-      { top: 112, opacity: 0.9,  scale: 0.99, blur: 0 },
+      { top: 73,  opacity: 1,    scale: 0.97, blur: 0 },
+      { top: 112, opacity: 1,    scale: 0.99, blur: 0 },
       { top: 153, opacity: 1,    scale: 1,    blur: 0 },
-      { top: 194, opacity: 0,    scale: 1.02, blur: 1 }
+      { top: 194, opacity: 0,    scale: 1.02, blur: 0 }
     ];
     var baseTransform = 'translateX(-50%) rotate(-15deg) skewX(15deg) scaleY(.97)';
     var timer = null;
     var recycleTimer = null;
-    var positions = [1, 2, 3];
+    var positions = [1, 2, 3, 4];
 
     fixed.style.zIndex = '6';
     fixed.style.pointerEvents = 'none';
