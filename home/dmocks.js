@@ -347,7 +347,7 @@
     var removeTimer = null;
     var items = [];
 
-    fixed.style.zIndex = '6';
+    fixed.style.zIndex = '10';
     fixed.style.pointerEvents = 'none';
     for (var h = 0; h < cards.length; h++) {
       var movingLogo = cards[h].querySelector('.dmk3-logo');
@@ -367,7 +367,7 @@
       card.style.opacity = slot.opacity;
       card.style.transform = baseTransform + ' scale(' + slot.scale + ')';
       card.style.filter = slot.blur ? 'blur(' + slot.blur + 'px)' : 'none';
-      card.style.zIndex = '2';
+      card.style.zIndex = String(6 - slots.indexOf(slot));
       card.style.pointerEvents = 'none';
     }
 
