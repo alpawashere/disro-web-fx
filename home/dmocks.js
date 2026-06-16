@@ -134,6 +134,16 @@
     if (!bubble || !dash || !rail || !metrics.length || !fills.length || !icons.length) return;
 
     var prompt = bubble.textContent;
+    var bubbleStyle = window.getComputedStyle(bubble);
+    var bubbleLineHeight = parseFloat(bubbleStyle.lineHeight);
+    if (!bubbleLineHeight) bubbleLineHeight = parseFloat(bubbleStyle.fontSize) * 1.45;
+    var bubbleOneLineHeight = Math.ceil(
+      bubbleLineHeight +
+      parseFloat(bubbleStyle.paddingTop) +
+      parseFloat(bubbleStyle.paddingBottom) +
+      parseFloat(bubbleStyle.borderTopWidth || 0) +
+      parseFloat(bubbleStyle.borderBottomWidth || 0)
+    );
     var fillWidths = fills.map(function (f) { return window.getComputedStyle(f).width; });
     var timers = [];
     var running = false;
@@ -156,6 +166,9 @@
       bubble.style.transition = 'none';
       bubble.style.opacity = '0';
       bubble.style.transform = 'translateY(12px) scale(0.96)';
+      bubble.style.overflow = 'hidden';
+      bubble.style.minHeight = bubbleOneLineHeight + 'px';
+      bubble.style.maxHeight = bubbleOneLineHeight + 'px';
       bubble.textContent = '';
 
       dash.style.transition = 'none';
@@ -190,6 +203,7 @@
         if (!running) return;
         step++;
         bubble.textContent = prompt.slice(0, step);
+        bubble.style.maxHeight = Math.max(bubbleOneLineHeight, bubble.scrollHeight) + 'px';
         if (step < total) later(tick, write);
       }
       write();
@@ -201,7 +215,7 @@
       resetFrame();
 
       later(80, function () {
-        bubble.style.transition = 'opacity 220ms ease, transform 520ms cubic-bezier(0.19, 1, 0.22, 1)';
+        bubble.style.transition = 'opacity 220ms ease, transform 520ms cubic-bezier(0.19, 1, 0.22, 1), max-height 260ms ease';
         bubble.style.opacity = '1';
         bubble.style.transform = 'translateY(0) scale(1)';
       });
