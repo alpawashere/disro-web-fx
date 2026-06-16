@@ -125,12 +125,13 @@
 
     var bubble = box.querySelector('.dmk2-bubble');
     var dash = box.querySelector('.dmk2-dash');
+    var rail = box.querySelector('.dmk2-rail');
     var metrics = Array.prototype.slice.call(box.querySelectorAll('.dmk2-m'));
     var fills = Array.prototype.slice.call(box.querySelectorAll(
       '.dmk2-f1, .dmk2-f2, .dmk2-f3, .dmk2-f4, .dmk2-f5, .dmk2-f6, .dmk2-f7, .dmk2-f8'
     ));
     var icons = Array.prototype.slice.call(box.querySelectorAll('.dmk2-rail > div'));
-    if (!bubble || !dash || !metrics.length || !fills.length || !icons.length) return;
+    if (!bubble || !dash || !rail || !metrics.length || !fills.length || !icons.length) return;
 
     var prompt = bubble.textContent;
     var fillWidths = fills.map(function (f) { return window.getComputedStyle(f).width; });
@@ -149,6 +150,9 @@
     }
 
     function resetFrame() {
+      rail.style.left = '313px';
+      rail.style.top = '123px';
+
       bubble.style.transition = 'none';
       bubble.style.opacity = '0';
       bubble.style.transform = 'translateY(12px) scale(0.96)';
