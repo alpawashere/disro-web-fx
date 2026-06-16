@@ -400,8 +400,10 @@
 
     function start() {
       if (timer) return;
-      step();
-      timer = setInterval(step, 1600);
+      timer = setTimeout(function () {
+        step();
+        timer = setInterval(step, 1600);
+      }, 900);
     }
 
     function stop() {
