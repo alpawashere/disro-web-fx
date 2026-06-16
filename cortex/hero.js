@@ -21,13 +21,21 @@
     root.style.overflowAnchor = 'none';
     stage.style.overflow = 'visible';
 
+    var waveClip = stage.querySelector('.cxhclip');
+    if (!waveClip) {
+      waveClip = document.createElement('div');
+      waveClip.className = 'cxhclip';
+      stage.insertBefore(waveClip, stage.firstChild);
+    }
+
     var style = document.createElement('style');
     style.textContent =
       '@keyframes cxhbeat{0%{transform:translate(-50%,-50%) scale(1)}4.4%{transform:translate(-50%,-50%) scale(1.055)}8.8%{transform:translate(-50%,-50%) scale(1)}13.2%{transform:translate(-50%,-50%) scale(1.09)}22%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-50%) scale(1)}}' +
       '@keyframes cxhwave{0%{transform:translate(-50%,-50%) scale(1);opacity:.9}100%{transform:translate(-50%,-50%) scale(2.4);opacity:0}}' +
       '.cx-heroimg-badge{animation:cxhbeat 2s linear infinite;}' +
-      '.cxhwave{position:absolute;left:50%;top:50%;width:36%;aspect-ratio:1/1;border-radius:50%;background:radial-gradient(circle,rgba(208,208,208,.85) 0%,rgba(208,208,208,.65) 62%,rgba(208,208,208,0) 100%);pointer-events:none;animation:cxhwave 1.6s cubic-bezier(.17,.67,.45,1) forwards;z-index:1;}' +
-      '.cxhband{position:absolute;left:50%;top:50%;width:36%;aspect-ratio:1/1;border-radius:50%;pointer-events:none;backdrop-filter:blur(1.6px);-webkit-backdrop-filter:blur(1.6px);-webkit-mask:radial-gradient(circle,transparent 74%,#000 84%,#000 94%,transparent 100%);mask:radial-gradient(circle,transparent 74%,#000 84%,#000 94%,transparent 100%);animation:cxhwave 1.6s cubic-bezier(.17,.67,.45,1) forwards;z-index:1;}' +
+      '.cxhclip{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1;-webkit-mask:linear-gradient(to bottom,transparent 0%,transparent 17%,#000 28%,#000 100%);mask:linear-gradient(to bottom,transparent 0%,transparent 17%,#000 28%,#000 100%);}' +
+      '.cxhwave{position:absolute;left:50%;top:50%;width:36%;aspect-ratio:1/1;border-radius:50%;background:radial-gradient(circle,rgba(208,208,208,.85) 0%,rgba(208,208,208,.65) 62%,rgba(208,208,208,0) 100%);pointer-events:none;animation:cxhwave 1.6s cubic-bezier(.17,.67,.45,1) forwards;}' +
+      '.cxhband{position:absolute;left:50%;top:50%;width:36%;aspect-ratio:1/1;border-radius:50%;pointer-events:none;backdrop-filter:blur(1.6px);-webkit-backdrop-filter:blur(1.6px);-webkit-mask:radial-gradient(circle,transparent 74%,#000 84%,#000 94%,transparent 100%);mask:radial-gradient(circle,transparent 74%,#000 84%,#000 94%,transparent 100%);animation:cxhwave 1.6s cubic-bezier(.17,.67,.45,1) forwards;}' +
       '@media (max-width:767px){.cxhband{display:none}}';
     document.head.appendChild(style);
 
@@ -139,12 +147,12 @@
     function spawn() {
       var w = document.createElement('div');
       w.className = 'cxhwave';
-      stage.insertBefore(w, stage.firstChild);
+      waveClip.appendChild(w);
       w.addEventListener('animationend', function () { w.remove(); });
 
       var b = document.createElement('div');
       b.className = 'cxhband';
-      stage.insertBefore(b, stage.firstChild);
+      waveClip.appendChild(b);
       b.addEventListener('animationend', function () { b.remove(); });
 
       plan(false);
