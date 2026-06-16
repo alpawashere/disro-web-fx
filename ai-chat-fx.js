@@ -38,7 +38,7 @@
       { x: 8.47,  y: 258, size: 64,  r: 16, s: 0.72, o: 0.42 },
       { x: 17.45, y: 131, size: 70,  r: 18, s: 0.82, o: 0.68 },
       { x: 30.8,  y: 36,  size: 88,  r: 22, s: 0.94, o: 0.88 },
-      { x: 46,    y: 0,   size: 100, r: 25, s: 1.16, o: 1 },
+      { x: 50,    y: 0,   size: 100, r: 25, s: 1.16, o: 1 },
       { x: 62.85, y: 36,  size: 88,  r: 22, s: 0.94, o: 0.88 },
       { x: 77.52, y: 131, size: 70,  r: 18, s: 0.82, o: 0.68 },
       { x: 86.86, y: 258, size: 64,  r: 16, s: 0.72, o: 0.42 },
@@ -69,10 +69,11 @@
     for (var i = 0; i < originals.length; i++) originals[i].style.opacity = '0';
 
     var nodes = [];
-    var nextItem = 7;
+    var nextItem = 9;
 
     function applyNode(node, animate) {
-      var slot = slots[node._pathIndex];
+      var pathIndex = node._pathIndex;
+      var slot = slots[pathIndex];
       node.style.transition = animate
         ? 'left 980ms cubic-bezier(0.19,1,0.22,1), top 980ms cubic-bezier(0.19,1,0.22,1), width 980ms cubic-bezier(0.19,1,0.22,1), height 980ms cubic-bezier(0.19,1,0.22,1), border-radius 980ms cubic-bezier(0.19,1,0.22,1), transform 980ms cubic-bezier(0.19,1,0.22,1), opacity 520ms ease'
         : 'none';
@@ -82,48 +83,52 @@
       node.style.height = slot.size + 'px';
       node.style.borderRadius = slot.r + 'px';
       node.style.opacity = slot.o;
-      node.style.zIndex = String(30 - Math.abs(node._pathIndex - 4));
+      node.style.zIndex = String(30 - Math.abs(pathIndex - 4));
       node.style.transform = 'translateX(-50%) scale(' + slot.s + ')';
     }
 
-    function createNode(itemIndex, pathIndex) {
+    function setItem(node, itemIndex) {
       var item = items[itemIndex % items.length];
-      var el = document.createElement('div');
-      el.className = 'aic-fx-item' + (item.cls ? ' ' + item.cls : '');
-      el.style.backgroundColor = item.bg;
-      el.style.backgroundImage = item.imgBg ? 'url("' + item.imgBg + '")' : 'none';
-      el.innerHTML = item.html || '';
-      el._pathIndex = pathIndex;
-      host.appendChild(el);
-      applyNode(el, false);
-      nodes.push(el);
-      return el;
+      node.className = 'aic-fx-item' + (item.cls ? ' ' + item.cls : '');
+      node.style.backgroundColor = item.bg;
+      node.style.backgroundImage = item.imgBg ? 'url("' + item.imgBg + '")' : 'none';
+      node.innerHTML = item.html || '';
     }
 
     var timer = null;
+    var moving = false;
 
     function applyInstant() {
-      for (var i = 0; i < 7; i++) createNode(i, i + 1);
+      for (var i = 0; i < 9; i++) {
+        var el = document.createElement('div');
+        el._pathIndex = i;
+        setItem(el, i);
+        host.appendChild(el);
+        nodes.push(el);
+        applyNode(el, false);
+      }
     }
 
     function step() {
-      createNode(nextItem, 0);
-      nextItem++;
+      if (moving) return;
+      moving = true;
+      var recycler = null;
+      for (var i = 0; i < nodes.length; i++) {
+        if (nodes[i]._pathIndex === 8) recycler = nodes[i];
+      }
+      if (recycler) {
+        recycler._pathIndex = 0;
+        setItem(recycler, nextItem);
+        nextItem++;
+        applyNode(recycler, false);
+      }
       host.offsetHeight;
       for (var i = 0; i < nodes.length; i++) {
         nodes[i]._pathIndex += 1;
         applyNode(nodes[i], true);
       }
       setTimeout(function () {
-        var kept = [];
-        for (var i = 0; i < nodes.length; i++) {
-          if (nodes[i]._pathIndex > 8) {
-            if (nodes[i].parentNode) nodes[i].parentNode.removeChild(nodes[i]);
-          } else {
-            kept.push(nodes[i]);
-          }
-        }
-        nodes = kept;
+        moving = false;
       }, 1040);
     }
 
