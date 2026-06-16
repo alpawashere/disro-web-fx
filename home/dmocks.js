@@ -115,9 +115,152 @@
     }, { threshold: [0, 0.35] }).observe(box);
   }
 
+  /* dmk2 "intelligence at the core" cycle — the prompt primes the side rail,
+     then the dashboard builds in with metrics and channel/ROI bars. Runtime
+     styles only; the static Webflow layout remains the reduced-motion state. */
+  function initDmk2Cycle() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var box = document.querySelector('.dmk2');
+    if (!box) return;
+
+    var bubble = box.querySelector('.dmk2-bubble');
+    var dash = box.querySelector('.dmk2-dash');
+    var metrics = Array.prototype.slice.call(box.querySelectorAll('.dmk2-m'));
+    var fills = Array.prototype.slice.call(box.querySelectorAll(
+      '.dmk2-f1, .dmk2-f2, .dmk2-f3, .dmk2-f4, .dmk2-f5, .dmk2-f6, .dmk2-f7, .dmk2-f8'
+    ));
+    var icons = Array.prototype.slice.call(box.querySelectorAll('.dmk2-rail > div'));
+    if (!bubble || !dash || !metrics.length || !fills.length || !icons.length) return;
+
+    var fillWidths = fills.map(function (f) { return window.getComputedStyle(f).width; });
+    var timers = [];
+    var running = false;
+
+    function later(ms, fn) {
+      var t = setTimeout(fn, ms);
+      timers.push(t);
+      return t;
+    }
+
+    function clearTimers() {
+      for (var i = 0; i < timers.length; i++) clearTimeout(timers[i]);
+      timers = [];
+    }
+
+    function resetFrame() {
+      bubble.style.transition = 'none';
+      bubble.style.opacity = '1';
+      bubble.style.transform = 'translateY(0) scale(1)';
+
+      dash.style.transition = 'none';
+      dash.style.opacity = '0';
+      dash.style.transform = 'translateY(16px) scale(0.96)';
+      dash.style.transformOrigin = '50% 18%';
+
+      for (var i = 0; i < metrics.length; i++) {
+        metrics[i].style.transition = 'none';
+        metrics[i].style.opacity = '0';
+        metrics[i].style.transform = 'translateY(8px)';
+      }
+
+      for (var j = 0; j < fills.length; j++) {
+        fills[j].style.transition = 'none';
+        fills[j].style.width = '0px';
+      }
+
+      for (var k = 0; k < icons.length; k++) {
+        icons[k].style.transition = 'none';
+        icons[k].style.opacity = '0.38';
+        icons[k].style.transform = 'scale(0.88)';
+        icons[k].style.transformOrigin = '50% 50%';
+      }
+    }
+
+    function play() {
+      if (!running) return;
+      clearTimers();
+      resetFrame();
+
+      later(80, function () {
+        bubble.style.transition = 'transform 560ms cubic-bezier(0.19, 1, 0.22, 1)';
+        bubble.style.transform = 'translateY(-4px) scale(1.01)';
+      });
+
+      for (var i = 0; i < icons.length; i++) {
+        (function (icon, n) {
+          later(260 + n * 150, function () {
+            icon.style.transition = 'opacity 260ms ease, transform 520ms cubic-bezier(0.19, 1, 0.22, 1)';
+            icon.style.opacity = '1';
+            icon.style.transform = 'scale(1.08)';
+            later(220, function () { icon.style.transform = 'scale(1)'; });
+          });
+        })(icons[i], i);
+      }
+
+      later(980, function () {
+        dash.style.transition = 'opacity 360ms ease, transform 760ms cubic-bezier(0.19, 1, 0.22, 1)';
+        dash.style.opacity = '1';
+        dash.style.transform = 'translateY(0) scale(1)';
+      });
+
+      for (var m = 0; m < metrics.length; m++) {
+        (function (card, n) {
+          later(1260 + n * 115, function () {
+            card.style.transition = 'opacity 260ms ease, transform 520ms cubic-bezier(0.19, 1, 0.22, 1)';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          });
+        })(metrics[m], m);
+      }
+
+      for (var f = 0; f < fills.length; f++) {
+        (function (bar, w, n) {
+          later(1640 + n * 75, function () {
+            bar.style.transition = 'width 620ms cubic-bezier(0.19, 1, 0.22, 1)';
+            bar.style.width = w;
+          });
+        })(fills[f], fillWidths[f], f);
+      }
+
+      later(4300, function () {
+        bubble.style.transition = 'opacity 260ms ease, transform 420ms ease';
+        dash.style.transition = 'opacity 260ms ease, transform 420ms ease';
+        bubble.style.opacity = '0';
+        dash.style.opacity = '0';
+        dash.style.transform = 'translateY(12px) scale(0.985)';
+        for (var i = 0; i < icons.length; i++) icons[i].style.opacity = '0.38';
+      });
+
+      later(4700, play);
+    }
+
+    function start() {
+      if (running) return;
+      running = true;
+      play();
+    }
+
+    function stop() {
+      running = false;
+      clearTimers();
+    }
+
+    new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        var e = entries[i];
+        if (!e.isIntersecting) stop();
+        else if (e.intersectionRatio >= 0.35) start();
+      }
+    }, { threshold: [0, 0.35] }).observe(box);
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initStackCycle);
+    document.addEventListener('DOMContentLoaded', function () {
+      initStackCycle();
+      initDmk2Cycle();
+    });
   } else {
     initStackCycle();
+    initDmk2Cycle();
   }
 })();
