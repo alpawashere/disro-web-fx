@@ -195,14 +195,28 @@
       }
     }
 
+    function escapeHTML(s) {
+      return s.replace(/[&<>"']/g, function (ch) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+      });
+    }
+
     function typePrompt() {
       var step = 0;
       var total = prompt.length;
-      var tick = Math.max(18, Math.floor(1250 / total));
+      var tick = Math.max(12, Math.floor(760 / total));
       function write() {
         if (!running) return;
         step++;
-        bubble.textContent = prompt.slice(0, step);
+        var settled = prompt.slice(0, Math.max(0, step - 1));
+        var forming = prompt.slice(step - 1, step);
+        if (step < total) {
+          bubble.innerHTML = escapeHTML(settled) +
+            '<span style="display:inline-block;filter:blur(3px);opacity:.45;transform:translateY(1px);">' +
+            escapeHTML(forming) + '</span>';
+        } else {
+          bubble.textContent = prompt;
+        }
         bubble.style.maxHeight = Math.max(bubbleOneLineHeight, bubble.scrollHeight) + 'px';
         if (step < total) later(tick, write);
       }
