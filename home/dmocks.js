@@ -268,6 +268,8 @@
       clearTimers();
     }
 
+    resetFrame();
+
     new IntersectionObserver(function (entries) {
       for (var i = 0; i < entries.length; i++) {
         var e = entries[i];
