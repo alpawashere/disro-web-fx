@@ -350,6 +350,10 @@
 
     fixed.style.zIndex = '6';
     fixed.style.pointerEvents = 'none';
+    for (var h = 0; h < cards.length; h++) {
+      var movingLogo = cards[h].querySelector('.dmk3-logo');
+      if (movingLogo) movingLogo.style.display = 'none';
+    }
 
     function setLabel(card, text) {
       var label = card.querySelector('.dmk3-lab');
