@@ -11,6 +11,9 @@
     var host = document.querySelector('.aic-heroimg-illustration');
     if (!host || host.getAttribute('data-aic-fx') === 'true') return;
     host.setAttribute('data-aic-fx', 'true');
+    for (var clip = host, clipDepth = 0; clip && clipDepth < 4; clip = clip.parentElement, clipDepth++) {
+      clip.style.overflow = 'visible';
+    }
 
     var originals = [
       host.querySelector('.aic-heroimg-icon-bl'),
@@ -25,6 +28,7 @@
 
     var style = document.createElement('style');
     style.textContent =
+      '.aic-heroimg-illustration{overflow:visible!important;}' +
       '.aic-fx-item{position:absolute;display:flex;align-items:center;justify-content:center;overflow:hidden;' +
       'box-shadow:-3px -3px 8px rgba(255,255,255,.5),4px 4px 16px rgba(25,25,25,.2);will-change:left,top,width,height,transform,opacity;}' +
       '.aic-fx-item img,.aic-fx-item svg{display:block;max-width:68%;max-height:68%;}' +
@@ -34,13 +38,13 @@
     document.head.appendChild(style);
 
     var slots = [
-      { x: 8.47,  y: 258, size: 64,  r: 16, s: 0.72, o: 0.42 },
-      { x: 17.45, y: 131, size: 70,  r: 18, s: 0.82, o: 0.68 },
-      { x: 30.8,  y: 36,  size: 88,  r: 22, s: 0.94, o: 0.88 },
-      { x: 50,    y: 0,   size: 100, r: 25, s: 1.16, o: 1 },
-      { x: 62.85, y: 36,  size: 88,  r: 22, s: 0.94, o: 0.88 },
-      { x: 77.52, y: 131, size: 70,  r: 18, s: 0.82, o: 0.68 },
-      { x: 86.86, y: 258, size: 64,  r: 16, s: 0.72, o: 0.42 }
+      { x: 10.5, y: 292, size: 58,  r: 15, s: 0.74, o: 0.42 },
+      { x: 21,   y: 172, size: 66,  r: 17, s: 0.84, o: 0.68 },
+      { x: 34,   y: 83,  size: 84,  r: 21, s: 0.96, o: 0.88 },
+      { x: 50,   y: 52,  size: 100, r: 25, s: 1.16, o: 1 },
+      { x: 66,   y: 83,  size: 84,  r: 21, s: 0.96, o: 0.88 },
+      { x: 79,   y: 172, size: 66,  r: 17, s: 0.84, o: 0.68 },
+      { x: 89.5, y: 292, size: 58,  r: 15, s: 0.74, o: 0.42 }
     ];
 
     function makeAgent(src) {
@@ -82,7 +86,7 @@
       node.style.borderRadius = slot.r + 'px';
       node.style.opacity = slot.o;
       node.style.zIndex = String(30 - Math.abs(slotIndex - 3));
-      node.style.transform = 'translateX(-50%) scale(' + slot.s + ')';
+      node.style.transform = 'translate(-50%, -50%) scale(' + slot.s + ')';
     }
 
     function setItem(node, itemIndex) {
