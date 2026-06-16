@@ -115,8 +115,8 @@
     }, { threshold: [0, 0.35] }).observe(box);
   }
 
-  /* dmk2 "intelligence at the core" cycle — the prompt primes the side rail,
-     then the dashboard builds in with metrics and channel/ROI bars. Runtime
+  /* dmk2 "intelligence at the core" cycle — bubble appears, prompt types in,
+     dashboard builds, then the four connected icons resolve at the end. Runtime
      styles only; the static Webflow layout remains the reduced-motion state. */
   function initDmk2Cycle() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -132,6 +132,7 @@
     var icons = Array.prototype.slice.call(box.querySelectorAll('.dmk2-rail > div'));
     if (!bubble || !dash || !metrics.length || !fills.length || !icons.length) return;
 
+    var prompt = bubble.textContent;
     var fillWidths = fills.map(function (f) { return window.getComputedStyle(f).width; });
     var timers = [];
     var running = false;
@@ -149,12 +150,13 @@
 
     function resetFrame() {
       bubble.style.transition = 'none';
-      bubble.style.opacity = '1';
-      bubble.style.transform = 'translateY(0) scale(1)';
+      bubble.style.opacity = '0';
+      bubble.style.transform = 'translateY(12px) scale(0.96)';
+      bubble.textContent = '';
 
       dash.style.transition = 'none';
       dash.style.opacity = '0';
-      dash.style.transform = 'translateY(16px) scale(0.96)';
+      dash.style.transform = 'translateY(18px) scale(0.96)';
       dash.style.transformOrigin = '50% 18%';
 
       for (var i = 0; i < metrics.length; i++) {
@@ -170,10 +172,23 @@
 
       for (var k = 0; k < icons.length; k++) {
         icons[k].style.transition = 'none';
-        icons[k].style.opacity = '0.38';
-        icons[k].style.transform = 'scale(0.88)';
+        icons[k].style.opacity = '0';
+        icons[k].style.transform = 'translateX(-8px) scale(0.84)';
         icons[k].style.transformOrigin = '50% 50%';
       }
+    }
+
+    function typePrompt() {
+      var step = 0;
+      var total = prompt.length;
+      var tick = Math.max(18, Math.floor(1250 / total));
+      function write() {
+        if (!running) return;
+        step++;
+        bubble.textContent = prompt.slice(0, step);
+        if (step < total) later(tick, write);
+      }
+      write();
     }
 
     function play() {
@@ -182,22 +197,19 @@
       resetFrame();
 
       later(80, function () {
-        bubble.style.transition = 'transform 560ms cubic-bezier(0.19, 1, 0.22, 1)';
+        bubble.style.transition = 'opacity 220ms ease, transform 520ms cubic-bezier(0.19, 1, 0.22, 1)';
+        bubble.style.opacity = '1';
+        bubble.style.transform = 'translateY(0) scale(1)';
+      });
+
+      later(320, typePrompt);
+
+      later(1780, function () {
+        bubble.style.transition = 'transform 520ms cubic-bezier(0.19, 1, 0.22, 1)';
         bubble.style.transform = 'translateY(-4px) scale(1.01)';
       });
 
-      for (var i = 0; i < icons.length; i++) {
-        (function (icon, n) {
-          later(260 + n * 150, function () {
-            icon.style.transition = 'opacity 260ms ease, transform 520ms cubic-bezier(0.19, 1, 0.22, 1)';
-            icon.style.opacity = '1';
-            icon.style.transform = 'scale(1.08)';
-            later(220, function () { icon.style.transform = 'scale(1)'; });
-          });
-        })(icons[i], i);
-      }
-
-      later(980, function () {
+      later(1980, function () {
         dash.style.transition = 'opacity 360ms ease, transform 760ms cubic-bezier(0.19, 1, 0.22, 1)';
         dash.style.opacity = '1';
         dash.style.transform = 'translateY(0) scale(1)';
@@ -205,7 +217,7 @@
 
       for (var m = 0; m < metrics.length; m++) {
         (function (card, n) {
-          later(1260 + n * 115, function () {
+          later(2260 + n * 115, function () {
             card.style.transition = 'opacity 260ms ease, transform 520ms cubic-bezier(0.19, 1, 0.22, 1)';
             card.style.opacity = '1';
             card.style.transform = 'translateY(0)';
@@ -215,23 +227,34 @@
 
       for (var f = 0; f < fills.length; f++) {
         (function (bar, w, n) {
-          later(1640 + n * 75, function () {
+          later(2640 + n * 75, function () {
             bar.style.transition = 'width 620ms cubic-bezier(0.19, 1, 0.22, 1)';
             bar.style.width = w;
           });
         })(fills[f], fillWidths[f], f);
       }
 
-      later(4300, function () {
+      for (var i = 0; i < icons.length; i++) {
+        (function (icon, n) {
+          later(3440 + n * 150, function () {
+            icon.style.transition = 'opacity 260ms ease, transform 520ms cubic-bezier(0.19, 1, 0.22, 1)';
+            icon.style.opacity = '1';
+            icon.style.transform = 'translateX(0) scale(1.08)';
+            later(220, function () { icon.style.transform = 'translateX(0) scale(1)'; });
+          });
+        })(icons[i], i);
+      }
+
+      later(5400, function () {
         bubble.style.transition = 'opacity 260ms ease, transform 420ms ease';
         dash.style.transition = 'opacity 260ms ease, transform 420ms ease';
         bubble.style.opacity = '0';
         dash.style.opacity = '0';
         dash.style.transform = 'translateY(12px) scale(0.985)';
-        for (var i = 0; i < icons.length; i++) icons[i].style.opacity = '0.38';
+        for (var i = 0; i < icons.length; i++) icons[i].style.opacity = '0';
       });
 
-      later(4700, play);
+      later(5850, play);
     }
 
     function start() {
