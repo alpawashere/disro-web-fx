@@ -34,7 +34,8 @@
       '.aic-fx-item img,.aic-fx-item svg{display:block;max-width:68%;max-height:68%;}' +
       '.aic-fx-agent{background-position:50%;background-repeat:no-repeat;background-size:cover;}' +
       '.aic-fx-letter{font:600 26px/1 Geist,Arial,sans-serif;color:#fff;letter-spacing:-.04em;}' +
-      '.aic-fx-tool{font:600 22px/1 Geist,Arial,sans-serif;color:#191919;}';
+      '.aic-fx-tool{font:600 22px/1 Geist,Arial,sans-serif;color:#191919;}' +
+      '@media (max-width:767px){.aic-heroimg-card{position:relative!important;z-index:20!important}.aic-fx-letter{font-size:20px}.aic-fx-tool{font-size:15px}}';
     document.head.appendChild(style);
 
     var slotDefs = [
@@ -58,7 +59,7 @@
       var w = rect.width || host.clientWidth || 720;
       var h = rect.height || host.clientHeight || 344;
       var mobile = window.innerWidth <= 767 || w < 560;
-      var iconScale = mobile ? clamp(0.62, w / 520, 0.78) : 1;
+      var iconScale = mobile ? clamp(0.42, w / 840, 0.56) : 1;
       slots = slotDefs.map(function (slot, i) {
         return {
           x: slot.x,
@@ -66,7 +67,8 @@
           size: Math.round(slot.size * iconScale),
           r: Math.round(slot.r * iconScale),
           s: slot.s,
-          o: slot.o
+          o: slot.o,
+          mobile: mobile
         };
       });
     }
@@ -109,7 +111,7 @@
       node.style.height = slot.size + 'px';
       node.style.borderRadius = slot.r + 'px';
       node.style.opacity = slot.o;
-      node.style.zIndex = String(30 - Math.abs(slotIndex - 3));
+      node.style.zIndex = String(slot.mobile ? 8 - Math.abs(slotIndex - 3) : 30 - Math.abs(slotIndex - 3));
       node.style.transform = 'translate(-50%, -50%) scale(' + slot.s + ')';
     }
 
