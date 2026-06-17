@@ -37,7 +37,7 @@
       '.aic-fx-tool{font:600 22px/1 Geist,Arial,sans-serif;color:#191919;}';
     document.head.appendChild(style);
 
-    var slots = [
+    var slotDefs = [
       { x: 10.5, y: 292, size: 58,  r: 15, s: 0.74, o: 0.42 },
       { x: 21,   y: 172, size: 66,  r: 17, s: 0.84, o: 0.68 },
       { x: 34,   y: 83,  size: 84,  r: 21, s: 0.96, o: 0.88 },
@@ -46,6 +46,30 @@
       { x: 79,   y: 172, size: 66,  r: 17, s: 0.84, o: 0.68 },
       { x: 89.5, y: 292, size: 58,  r: 15, s: 0.74, o: 0.42 }
     ];
+    var mobileY = [0.82, 0.56, 0.32, 0.2, 0.32, 0.56, 0.82];
+    var slots = [];
+
+    function clamp(min, v, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function rebuildSlots() {
+      var rect = host.getBoundingClientRect();
+      var w = rect.width || host.clientWidth || 720;
+      var h = rect.height || host.clientHeight || 344;
+      var mobile = window.innerWidth <= 767 || w < 560;
+      var iconScale = mobile ? clamp(0.62, w / 520, 0.78) : 1;
+      slots = slotDefs.map(function (slot, i) {
+        return {
+          x: slot.x,
+          y: mobile ? Math.round(h * mobileY[i]) : slot.y,
+          size: Math.round(slot.size * iconScale),
+          r: Math.round(slot.r * iconScale),
+          s: slot.s,
+          o: slot.o
+        };
+      });
+    }
 
     function makeAgent(src) {
       return { bg: '#d9d9d9', imgBg: src, cls: 'aic-fx-agent' };
@@ -101,6 +125,7 @@
     var moving = false;
 
     function applyInstant() {
+      rebuildSlots();
       for (var i = 0; i < slots.length; i++) {
         var el = document.createElement('div');
         el._slotIndex = i;
@@ -110,6 +135,19 @@
         applyNode(el, false);
       }
     }
+
+    function relayoutInstant() {
+      rebuildSlots();
+      for (var i = 0; i < nodes.length; i++) applyNode(nodes[i], false);
+    }
+
+    var lastW = window.innerWidth;
+    window.addEventListener('resize', function () {
+      if (window.innerWidth === lastW) return;
+      lastW = window.innerWidth;
+      relayoutInstant();
+    });
+    window.addEventListener('load', relayoutInstant);
 
     function step() {
       if (moving) return;
