@@ -46,7 +46,12 @@
     var T = 2000;
     var SP = 264;
     var t0 = performance.now();
-    var toolColors = ['#191919', '#2f3335', '#4d5253', '#6b6f72', '#0E5241'];
+    var toolColors = {
+      mailchimp: '#000',
+      meta: '#0077f2',
+      klaviyo: '#000',
+      shopify: '#95bf47'
+    };
     var agentMessages = {
       'Email Flow': [
         'Recovering abandoned carts...',
@@ -175,12 +180,20 @@
       title.textContent = next;
     }
 
+    function toolColor(el) {
+      if (el.classList.contains('cx-heroimg-icon-tr') || el.querySelector('.cx-heroimg-icon-img-meta')) return toolColors.meta;
+      if (el.classList.contains('cx-heroimg-icon-br') || el.querySelector('.cx-heroimg-icon-img-shop')) return toolColors.shopify;
+      if (el.classList.contains('cx-heroimg-icon-bl') || el.querySelector('.cx-heroimg-icon-img-vid')) return toolColors.klaviyo;
+      if (el.classList.contains('cx-heroimg-icon-tl') || el.querySelector('.cx-heroimg-icon-img-mc')) return toolColors.mailchimp;
+      return '#191919';
+    }
+
     function setActive(o, on) {
       o.active = on;
       o.el.style.transition = 'box-shadow .45s ease, background-color .45s ease, filter .45s ease';
       if (on) {
         o.el.style.boxShadow = '0 0 0 1px rgba(255,255,255,.9), -5px -5px 13px rgba(255,255,255,.6), 8px 14px 30px rgba(25,25,25,.24)';
-        if (o.kind === 'icon') o.el.style.backgroundColor = pickOne(toolColors);
+        if (o.kind === 'icon') o.el.style.backgroundColor = toolColor(o.el);
         if (o.kind === 'agent') setAgentMessage(o.el);
       } else {
         o.el.style.boxShadow = '';
