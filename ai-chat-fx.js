@@ -60,7 +60,7 @@
       var h = rect.height || host.clientHeight || 344;
       var mobile = window.innerWidth <= 767 || w < 560;
       var iconScale = mobile ? clamp(0.42, w / 840, 0.56) : 1;
-      var mobileArcTop = h * 0.13;
+      var mobileArcTop = h * 0.07;
       var mobileArcDrop = h * 0.28;
       slots = slotDefs.map(function (slot, i) {
         var mobileDx = Math.abs(mobileX[i] - 50) / 50;
