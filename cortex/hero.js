@@ -20,13 +20,6 @@
     root.style.overflowAnchor = 'none';
     stage.style.overflow = 'visible';
 
-    var topVeil = stage.querySelector('.cxhveil');
-    if (!topVeil) {
-      topVeil = document.createElement('div');
-      topVeil.className = 'cxhveil';
-      stage.appendChild(topVeil);
-    }
-
     var waveClip = stage.querySelector('.cxhclip');
     if (!waveClip) {
       waveClip = document.createElement('div');
@@ -39,7 +32,7 @@
       '@keyframes cxhbeat{0%{transform:translate(-50%,-50%) scale(1)}4.4%{transform:translate(-50%,-50%) scale(1.055)}8.8%{transform:translate(-50%,-50%) scale(1)}13.2%{transform:translate(-50%,-50%) scale(1.09)}22%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-50%) scale(1)}}' +
       '@keyframes cxhwave{0%{transform:translate(-50%,-50%) scale(1);opacity:.9}100%{transform:translate(-50%,-50%) scale(2.4);opacity:0}}' +
       '.cx-heroimg-badge{animation:cxhbeat 2s linear infinite;}' +
-      '.cxhveil{position:absolute;left:-2%;right:-2%;top:-1px;height:32%;background:linear-gradient(to bottom,#f8f8f8 0%,#f8f8f8 58%,rgba(248,248,248,0) 100%);pointer-events:none;z-index:3;}' +
+      '.cx-heroimg-ring-outer,.cx-heroimg-ring-mid{-webkit-mask:linear-gradient(to bottom,transparent 0%,transparent 18%,#000 30%,#000 100%);mask:linear-gradient(to bottom,transparent 0%,transparent 18%,#000 30%,#000 100%);}' +
       '.cxhclip{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1;-webkit-mask:linear-gradient(to bottom,transparent 0%,transparent 17%,#000 28%,#000 100%);mask:linear-gradient(to bottom,transparent 0%,transparent 17%,#000 28%,#000 100%);}' +
       '.cxhwave{position:absolute;left:50%;top:50%;width:36%;aspect-ratio:1/1;border-radius:50%;background:radial-gradient(circle,rgba(208,208,208,.85) 0%,rgba(208,208,208,.65) 62%,rgba(208,208,208,0) 100%);pointer-events:none;animation:cxhwave 1.6s cubic-bezier(.17,.67,.45,1) forwards;}' +
       '.cxhband{position:absolute;left:50%;top:50%;width:36%;aspect-ratio:1/1;border-radius:50%;pointer-events:none;backdrop-filter:blur(1.6px);-webkit-backdrop-filter:blur(1.6px);-webkit-mask:radial-gradient(circle,transparent 74%,#000 84%,#000 94%,transparent 100%);mask:radial-gradient(circle,transparent 74%,#000 84%,#000 94%,transparent 100%);animation:cxhwave 1.6s cubic-bezier(.17,.67,.45,1) forwards;}' +
