@@ -46,6 +46,33 @@
     var T = 2000;
     var SP = 264;
     var t0 = performance.now();
+    var toolColors = ['#191919', '#2f3335', '#4d5253', '#6b6f72', '#0E5241'];
+    var agentMessages = {
+      'Email Flow': [
+        'Recovering abandoned carts...',
+        'Drafting a winback flow...',
+        'Scoring high-intent segments...',
+        'Syncing lifecycle triggers...'
+      ],
+      'App Stack': [
+        'Auditing your tech stack...',
+        'Checking integration drift...',
+        'Mapping app dependencies...',
+        'Flagging unused tools...'
+      ],
+      'CS': [
+        'Segmenting customers list...',
+        'Clustering support themes...',
+        'Ranking refund drivers...',
+        'Summarizing customer signals...'
+      ]
+    };
+    var fallbackMessages = [
+      'Finding the next action...',
+      'Reading company memory...',
+      'Updating the client context...',
+      'Prioritizing agent tasks...'
+    ];
 
     function stageRect() {
       return stage.getBoundingClientRect();
@@ -122,12 +149,39 @@
       return c.slice(0, n);
     }
 
+    function pickOne(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function agentLabel(el) {
+      var sub = el.querySelector('.cx-heroimg-agent-sub');
+      var txt = sub ? sub.textContent : '';
+      return txt.split('·')[0].replace(/^\s+|\s+$/g, '');
+    }
+
+    function setAgentMessage(el) {
+      var title = el.querySelector('.cx-heroimg-agent-title');
+      if (!title) return;
+      var label = agentLabel(el);
+      var choices = agentMessages[label] || fallbackMessages;
+      var next = pickOne(choices);
+      if (choices.length > 1) {
+        var guard = 0;
+        while (next === title.textContent && guard < 4) {
+          next = pickOne(choices);
+          guard++;
+        }
+      }
+      title.textContent = next;
+    }
+
     function setActive(o, on) {
       o.active = on;
       o.el.style.transition = 'box-shadow .45s ease, background-color .45s ease, filter .45s ease';
       if (on) {
         o.el.style.boxShadow = '0 0 0 1px rgba(255,255,255,.9), -5px -5px 13px rgba(255,255,255,.6), 8px 14px 30px rgba(25,25,25,.24)';
-        if (o.kind === 'icon') o.el.style.backgroundColor = '#191919';
+        if (o.kind === 'icon') o.el.style.backgroundColor = pickOne(toolColors);
+        if (o.kind === 'agent') setAgentMessage(o.el);
       } else {
         o.el.style.boxShadow = '';
         if (o.kind === 'icon') o.el.style.backgroundColor = '';
