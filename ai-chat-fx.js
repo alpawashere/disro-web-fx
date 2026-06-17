@@ -80,6 +80,8 @@
       return { bg: '#d9d9d9', imgBg: src, cls: 'aic-fx-agent' };
     }
 
+    var agentBase = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/main/assets/agents/';
+
     var items = [
       makeAgent('https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2c87d84279ca1f188fd6a3_untitled_ChatGPT%20Images%202.0%20Edit_2026-05-06_23-25-22%205.jpg'),
       { bg: '#1a1a1a', html: '<img src="https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2a1e81a643fa9f1941ce02_dmk2-klaviyo.svg" alt="">'},
@@ -88,13 +90,27 @@
       makeAgent('https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2c87d73e0793ecdb52fc16_untitled_ChatGPT%20Images%202.0%20Edit_2026-05-06_23-25-22%206.jpg'),
       { bg: '#0077f2', html: '<img src="https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a3057f451841e2293c9ce98_image-2-%5BVectorized%5D.svg" alt="">'},
       { bg: '#95bf47', html: '<img src="https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2a1e82a803b54e9f62e359_dmk2-shopify.svg" alt="">'},
+      makeAgent(agentBase + 'model-1.jpg'),
+      { bg: '#000', html: '<div class="aic-fx-letter">MC</div>' },
+      makeAgent(agentBase + 'model-2.jpg'),
       { bg: '#000', html: '<div class="aic-fx-letter">M</div>' },
+      makeAgent(agentBase + 'model-3.jpg'),
       { bg: '#f9ab00', html: '<div class="aic-fx-letter">GA</div>' },
+      { bg: '#0077f2', html: '<div class="aic-fx-letter">AD</div>' },
+      makeAgent(agentBase + 'model-4.jpg'),
       { bg: '#191919', html: '<div class="aic-fx-letter">WF</div>' },
       { bg: '#fff', html: '<div class="aic-fx-tool">SEO</div>' },
+      makeAgent(agentBase + 'model-5.jpg'),
       { bg: '#0e5241', html: '<div class="aic-fx-letter">PM</div>' },
+      { bg: '#95bf47', html: '<div class="aic-fx-letter">SK</div>' },
+      makeAgent(agentBase + 'model-6.jpg'),
       { bg: '#efefef', html: '<div class="aic-fx-tool">CS</div>' },
-      { bg: '#191919', html: '<div class="aic-fx-letter">AI</div>' }
+      { bg: '#191919', html: '<div class="aic-fx-letter">AI</div>' },
+      { bg: '#fff', html: '<div class="aic-fx-tool">CRM</div>' },
+      makeAgent(agentBase + 'model-7.jpg'),
+      { bg: '#0e5241', html: '<div class="aic-fx-letter">OP</div>' },
+      makeAgent(agentBase + 'model-8.jpg'),
+      { bg: '#191919', html: '<div class="aic-fx-letter">BI</div>' }
     ];
 
     for (var i = 0; i < originals.length; i++) originals[i].style.opacity = '0';
