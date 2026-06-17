@@ -32,10 +32,9 @@
       '.aic-fx-item{position:absolute;display:flex;align-items:center;justify-content:center;overflow:hidden;' +
       'box-shadow:-3px -3px 8px rgba(255,255,255,.5),4px 4px 16px rgba(25,25,25,.2);will-change:left,top,width,height,transform,opacity;}' +
       '.aic-fx-item img,.aic-fx-item svg{display:block;max-width:68%;max-height:68%;}' +
+      '.aic-fx-logo-wide{max-width:78%!important;max-height:58%!important;}' +
       '.aic-fx-agent{background-position:50%;background-repeat:no-repeat;background-size:cover;}' +
-      '.aic-fx-letter{font:600 26px/1 Geist,Arial,sans-serif;color:#fff;letter-spacing:-.04em;}' +
-      '.aic-fx-tool{font:600 22px/1 Geist,Arial,sans-serif;color:#191919;}' +
-      '@media (max-width:767px){.aic-heroimg-card{position:relative!important;z-index:20!important}.aic-fx-letter{font-size:20px}.aic-fx-tool{font-size:15px}}';
+      '@media (max-width:767px){.aic-heroimg-card{position:relative!important;z-index:20!important}}';
     document.head.appendChild(style);
 
     var slotDefs = [
@@ -81,36 +80,39 @@
     }
 
     var agentBase = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/main/assets/agents/';
+    var logoBase = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/main/assets/home-logos/';
+    function makeLogo(bg, src, wide) {
+      return { bg: bg, html: '<img' + (wide ? ' class="aic-fx-logo-wide"' : '') + ' src="' + src + '" alt="">' };
+    }
 
     var items = [
       makeAgent('https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2c87d84279ca1f188fd6a3_untitled_ChatGPT%20Images%202.0%20Edit_2026-05-06_23-25-22%205.jpg'),
-      { bg: '#1a1a1a', html: '<img src="https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2a1e81a643fa9f1941ce02_dmk2-klaviyo.svg" alt="">'},
-      { bg: '#fff', html: '<img src="https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a29d721a2d0ed6fb4bf4a2d_dcx-bars.svg" alt="">'},
+      makeLogo('#1a1a1a', 'https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2a1e81a643fa9f1941ce02_dmk2-klaviyo.svg'),
+      makeLogo('#fff', 'https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a29d721a2d0ed6fb4bf4a2d_dcx-bars.svg'),
       makeAgent('https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a178687c4c836a09c3cb391_Frame%2015-7.png'),
       makeAgent('https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2c87d73e0793ecdb52fc16_untitled_ChatGPT%20Images%202.0%20Edit_2026-05-06_23-25-22%206.jpg'),
-      { bg: '#0077f2', html: '<img src="https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a3057f451841e2293c9ce98_image-2-%5BVectorized%5D.svg" alt="">'},
-      { bg: '#95bf47', html: '<img src="https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2a1e82a803b54e9f62e359_dmk2-shopify.svg" alt="">'},
+      makeLogo('#0077f2', 'https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2a1e818a6a2403b7d09351_dmk2-meta.svg'),
+      makeLogo('#95bf47', 'https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2a1e82a803b54e9f62e359_dmk2-shopify.svg'),
       makeAgent(agentBase + 'model-1.jpg'),
-      { bg: '#000', html: '<div class="aic-fx-letter">MC</div>' },
+      makeLogo('#000', logoBase + 'mailchimp.png', true),
       makeAgent(agentBase + 'model-2.jpg'),
-      { bg: '#000', html: '<div class="aic-fx-letter">M</div>' },
+      makeLogo('#ff007f', logoBase + 'obvi.svg', true),
       makeAgent(agentBase + 'model-3.jpg'),
-      { bg: '#f9ab00', html: '<div class="aic-fx-letter">GA</div>' },
-      { bg: '#0077f2', html: '<div class="aic-fx-letter">AD</div>' },
+      makeLogo('#f9ab00', 'https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a2a1e828a6a2403b7d093a3_dmk2-ga.png'),
+      makeLogo('#F5E3E7', logoBase + 'glossier.svg', true),
       makeAgent(agentBase + 'model-4.jpg'),
-      { bg: '#191919', html: '<div class="aic-fx-letter">WF</div>' },
-      { bg: '#fff', html: '<div class="aic-fx-tool">SEO</div>' },
+      makeLogo('#191919', 'https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a29d721954f506fae6c6a9c_dcx-webflow.svg'),
+      makeLogo('#1e306e', logoBase + 'casper.png', true),
       makeAgent(agentBase + 'model-5.jpg'),
-      { bg: '#0e5241', html: '<div class="aic-fx-letter">PM</div>' },
-      { bg: '#95bf47', html: '<div class="aic-fx-letter">SK</div>' },
+      makeLogo('#EFE7DB', logoBase + 'oura.png', true),
+      makeLogo('#fff', logoBase + 'warby.png'),
       makeAgent(agentBase + 'model-6.jpg'),
-      { bg: '#efefef', html: '<div class="aic-fx-tool">CS</div>' },
-      { bg: '#191919', html: '<div class="aic-fx-letter">AI</div>' },
-      { bg: '#fff', html: '<div class="aic-fx-tool">CRM</div>' },
+      makeLogo('#000', logoBase + 'alo.png', true),
+      makeLogo('#fff', 'https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a305898fe755cf715f8cafe_google%20docs.svg'),
       makeAgent(agentBase + 'model-7.jpg'),
-      { bg: '#0e5241', html: '<div class="aic-fx-letter">OP</div>' },
+      makeLogo('#fff', 'https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a3057f5c176f62896a32426_cib%3Anotion.svg'),
       makeAgent(agentBase + 'model-8.jpg'),
-      { bg: '#191919', html: '<div class="aic-fx-letter">BI</div>' }
+      makeLogo('#fff', 'https://cdn.prod.website-files.com/698752f9145b6f03fa98b16d/6a3057f5c176f62896a32424_logos%3Aasana-icon.svg')
     ];
 
     for (var i = 0; i < originals.length; i++) originals[i].style.opacity = '0';
