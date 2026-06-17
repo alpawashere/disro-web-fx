@@ -47,7 +47,8 @@
       { x: 79,   y: 172, size: 66,  r: 17, s: 0.84, o: 0.68 },
       { x: 89.5, y: 292, size: 58,  r: 15, s: 0.74, o: 0.42 }
     ];
-    var mobileY = [0.82, 0.56, 0.32, 0.2, 0.32, 0.56, 0.82];
+    var mobileX = [1, 17, 34, 50, 66, 83, 99];
+    var mobileY = [0.48, 0.35, 0.25, 0.2, 0.25, 0.35, 0.48];
     var slots = [];
 
     function clamp(min, v, max) {
@@ -62,7 +63,7 @@
       var iconScale = mobile ? clamp(0.42, w / 840, 0.56) : 1;
       slots = slotDefs.map(function (slot, i) {
         return {
-          x: slot.x,
+          x: mobile ? mobileX[i] : slot.x,
           y: mobile ? Math.round(h * mobileY[i]) : slot.y,
           size: Math.round(slot.size * iconScale),
           r: Math.round(slot.r * iconScale),
