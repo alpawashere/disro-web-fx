@@ -49,5 +49,5 @@ Set as custom attributes on the `ag-heroimg-illustration` element (Agents page h
 
 | Attribute | Default | Meaning |
 |---|---|---|
-| `data-agents-dwell` | 1500 | pause between agent steps (ms) |
+| `data-agents-dwell` | 2500 | pause between agent steps (ms) |
 | `data-agents-k` / `data-agents-c` | 230 / 29 | spring stiffness / damping |

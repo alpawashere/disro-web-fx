@@ -24,7 +24,7 @@
     }
 
     var cfg = host.dataset || {};
-    var DWELL = num(cfg.agentsDwell, 1500);
+    var DWELL = num(cfg.agentsDwell, 2500);
     var K = num(cfg.agentsK, 230);
     var C = num(cfg.agentsC, 29);
     var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -144,7 +144,7 @@
     var style = document.createElement('style');
     style.textContent =
       '.ag-heroimg-illustration{overflow:hidden!important;}' +
-      '.agx-layer{position:absolute;inset:0;pointer-events:none;z-index:2;}' +
+      '.agx-layer{position:absolute;pointer-events:none;z-index:2;overflow:hidden;}' +
       '.agx-card{position:absolute;will-change:left,top,transform;}' +
       '.agx-card .ag-heroimg-meta{display:none!important;}' +
       '.agx-meta{position:absolute!important;pointer-events:none;z-index:4;}' +
@@ -155,16 +155,53 @@
     document.head.appendChild(style);
 
     function measureSlots() {
-      var hr = host.getBoundingClientRect();
+      var bg = host.querySelector('.ag-heroimg-bg');
+      var br = bg ? bg.getBoundingClientRect() : host.getBoundingClientRect();
       return cards.map(function (card, i) {
         var r = card.getBoundingClientRect();
         return {
-          x: r.left - hr.left + r.width / 2,
-          y: r.top - hr.top,
+          x: r.left - br.left + r.width / 2,
+          y: r.top - br.top,
           z: 20 - Math.abs(i - 2),
           opacity: i === 0 || i === 4 ? 0.72 : 1
         };
       });
+    }
+
+    function measureMask() {
+      var bg = host.querySelector('.ag-heroimg-bg');
+      var hr = host.getBoundingClientRect();
+      var br = bg ? bg.getBoundingClientRect() : hr;
+      var radius = bg ? getComputedStyle(bg).borderRadius : '14px';
+      return {
+        x: br.left - hr.left,
+        y: br.top - hr.top,
+        w: br.width,
+        h: br.height,
+        r: radius
+      };
+    }
+
+    function slotAt(slotIndex) {
+      var last = slots.length - 1;
+      var pitch = slots.length > 1 ? slots[1].x - slots[0].x : 250;
+      if (slotIndex < 0) {
+        return {
+          x: slots[0].x + pitch * slotIndex,
+          y: slots[0].y,
+          z: 10,
+          opacity: 0.72
+        };
+      }
+      if (slotIndex > last) {
+        return {
+          x: slots[last].x + pitch * (slotIndex - last),
+          y: slots[last].y,
+          z: 10,
+          opacity: 0.72
+        };
+      }
+      return slots[slotIndex];
     }
 
     function measureMeta() {
@@ -186,24 +223,27 @@
     label = meta.querySelector('.ag-heroimg-label');
 
     var slots = measureSlots();
+    var mask = measureMask();
     var layer = document.createElement('div');
     layer.className = 'agx-layer';
     host.appendChild(layer);
 
     var nodes = [];
     var firstAgent = 0;
-    for (var i = 0; i < cards.length; i++) {
-      var clone = cards[i].cloneNode(true);
+    for (var i = 0; i < cards.length + 1; i++) {
+      var slotIndex = i - 1;
+      var clone = cards[Math.max(0, Math.min(cards.length - 1, slotIndex))].cloneNode(true);
       clone.classList.add('agx-card');
-      clone.classList.toggle('ag-heroimg-card-featured', i === 2);
+      clone.classList.toggle('ag-heroimg-card-featured', slotIndex === 2);
       var p = clone.querySelector('.ag-heroimg-photo');
       if (p) {
-        p.className = i === 2 ? 'ag-heroimg-photo ag-heroimg-photo-featured' : 'ag-heroimg-photo';
+        p.className = slotIndex === 2 ? 'ag-heroimg-photo ag-heroimg-photo-featured' : 'ag-heroimg-photo';
       }
-      clone._slotIndex = i;
-      clone._agentIndex = firstAgent + i;
-      clone._x = slots[i].x;
-      clone._y = slots[i].y;
+      clone._slotIndex = slotIndex;
+      clone._agentIndex = firstAgent + slotIndex;
+      var startSlot = slotAt(slotIndex);
+      clone._x = startSlot.x;
+      clone._y = startSlot.y;
       clone._vx = 0;
       clone._vy = 0;
       setCardAgent(clone, clone._agentIndex);
@@ -215,7 +255,7 @@
     row.style.pointerEvents = 'none';
 
     function applyNode(node) {
-      var slot = slots[node._slotIndex];
+      var slot = slotAt(node._slotIndex);
       if (!slot) return;
       node.style.left = node._x + 'px';
       node.style.top = node._y + 'px';
@@ -231,13 +271,19 @@
 
     function snapAll() {
       slots = measureSlots();
+      mask = measureMask();
+      layer.style.left = mask.x + 'px';
+      layer.style.top = mask.y + 'px';
+      layer.style.width = mask.w + 'px';
+      layer.style.height = mask.h + 'px';
+      layer.style.borderRadius = mask.r;
       metaSlot = measureMeta();
       meta.style.left = metaSlot.x + 'px';
       meta.style.top = metaSlot.y + 'px';
       meta.style.width = metaSlot.w + 'px';
       meta.style.transform = 'translateX(-50%)';
       for (var i = 0; i < nodes.length; i++) {
-        var slot = slots[nodes[i]._slotIndex];
+        var slot = slotAt(nodes[i]._slotIndex);
         nodes[i]._x = slot.x;
         nodes[i]._y = slot.y;
         nodes[i]._vx = 0;
@@ -252,7 +298,7 @@
 
     var moving = false;
     var timer = null;
-    var nextAgent = firstAgent + cards.length;
+    var nextAgent = firstAgent - 1;
 
     function animateToTargets(done) {
       moving = true;
@@ -263,7 +309,7 @@
         var settled = true;
         for (var i = 0; i < nodes.length; i++) {
           var n = nodes[i];
-          var s = slots[n._slotIndex];
+          var s = slotAt(n._slotIndex);
           if (!s) continue;
           var ax = K * (s.x - n._x) - C * n._vx;
           var ay = K * (s.y - n._y) - C * n._vy;
@@ -279,7 +325,7 @@
           return;
         }
         for (var j = 0; j < nodes.length; j++) {
-          var sn = slots[nodes[j]._slotIndex];
+          var sn = slotAt(nodes[j]._slotIndex);
           nodes[j]._x = sn.x;
           nodes[j]._y = sn.y;
           nodes[j]._vx = 0;
@@ -296,21 +342,21 @@
       if (moving || !slots.length) return;
       var recycler = null;
       for (var i = 0; i < nodes.length; i++) {
-        if (nodes[i]._slotIndex === slots.length - 1) recycler = nodes[i];
-      }
-      for (var j = 0; j < nodes.length; j++) {
-        nodes[j]._slotIndex += 1;
+        if (nodes[i]._slotIndex === slots.length) recycler = nodes[i];
       }
       if (recycler) {
-        recycler._slotIndex = 0;
-        recycler._agentIndex = nextAgent++;
+        recycler._slotIndex = -1;
+        recycler._agentIndex = nextAgent--;
         setCardAgent(recycler, recycler._agentIndex);
-        var s0 = slots[0];
-        recycler._x = s0.x - (slots[1].x - slots[0].x);
-        recycler._y = s0.y;
+        var offLeft = slotAt(-1);
+        recycler._x = offLeft.x;
+        recycler._y = offLeft.y;
         recycler._vx = 0;
         recycler._vy = 0;
         applyNode(recycler);
+      }
+      for (var j = 0; j < nodes.length; j++) {
+        nodes[j]._slotIndex += 1;
       }
       animateToTargets(function () {
         var center = nodes.filter(function (n) { return n._slotIndex === 2; })[0];
