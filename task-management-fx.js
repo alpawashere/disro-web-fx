@@ -7,7 +7,20 @@
 
   ready(function () {
     var host = document.querySelector('.tm-heroimg-illustration');
-    if (!host || host.getAttribute('data-tm-fx') === 'true') return;
+    if (!host) return;
+
+    var killPacketStyle = document.getElementById('tmfx-kill-packet-style');
+    if (!killPacketStyle) {
+      killPacketStyle = document.createElement('style');
+      killPacketStyle.id = 'tmfx-kill-packet-style';
+      killPacketStyle.textContent = '.tmfx-packet{display:none!important;opacity:0!important;visibility:hidden!important;}';
+      document.head.appendChild(killPacketStyle);
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('.tmfx-packet'), function (el) {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    });
+
+    if (host.getAttribute('data-tm-fx') === 'true') return;
     host.setAttribute('data-tm-fx', 'true');
 
     var leftCards = Array.prototype.slice.call(host.querySelectorAll('.tm-heroimg-col-left .tm-heroimg-card'));
