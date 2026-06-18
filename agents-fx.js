@@ -148,10 +148,10 @@
       '.agx-card{position:absolute;will-change:left,top,transform;}' +
       '.agx-card .ag-heroimg-meta{display:none!important;}' +
       '.agx-meta{position:absolute!important;pointer-events:none;z-index:4;}' +
-      '.agx-tool-img{display:block;width:68%;height:68%;object-fit:contain;}' +
-      '.agx-tool-wide{width:78%;height:56%;}' +
+      '.agx-tool-img{display:block;width:100%;height:100%;object-fit:contain;}' +
+      '.agx-tool-wide{width:100%;height:72%;}' +
       '.agx-meta.ag-heroimg-meta{will-change:opacity,transform;}' +
-      '@media (max-width:767px){.agx-tool-img{width:70%;height:70%;}.agx-tool-wide{width:80%;height:58%;}}';
+      '@media (max-width:767px){.agx-tool-img{width:100%;height:100%;}.agx-tool-wide{width:100%;height:72%;}}';
     document.head.appendChild(style);
 
     function measureSlots() {
