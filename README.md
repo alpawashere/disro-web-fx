@@ -14,6 +14,7 @@ Each file here is fetched at runtime by a tiny inline loader registered on the W
 | `home/shine.js` | Chrome reflection sweep on the section title | via manifest |
 | `home/slack.js` | Slack section conversation loop (typing bubbles, infinite replay) | via manifest |
 | `agents-fx.js` | Agents page hero card stepper + center label/tool sync | Agents page footer loader |
+| `task-management-fx.js` | Task Management hero SOW/SOP/task-to-agent handoff loop | Task Management page footer loader |
 | `cortex-fx.js` | Manifest for Cortex page animations | Cortex page footer loader |
 | `cortex/hero.js` | Cortex hero core pulse + orbit activation | via Cortex manifest |
 
@@ -51,3 +52,9 @@ Set as custom attributes on the `ag-heroimg-illustration` element (Agents page h
 |---|---|---|
 | `data-agents-dwell` | 2500 | pause between agent steps (ms) |
 | `data-agents-k` / `data-agents-c` | 230 / 29 | spring stiffness / damping |
+
+Set as a custom attribute on the `tm-heroimg-illustration` element (Task Management page hero):
+
+| Attribute | Default | Meaning |
+|---|---|---|
+| `data-tm-dwell` | 1900 | pause between handoff steps (ms) |
