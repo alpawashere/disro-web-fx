@@ -89,11 +89,16 @@
     function runPacket(fromEl, toEl) {
       var start = pointFor(fromEl, 'right');
       var centerLeft = pointFor(center, 'left');
-      var centerMid = pointFor(center, 'center');
       var centerRight = pointFor(center, 'right');
       var end = pointFor(toEl, 'left');
       var leftPath = lineLeft ? pointFor(lineLeft, 'center') : centerLeft;
       var rightPath = lineRight ? pointFor(lineRight, 'center') : centerRight;
+      var hostRect = host.getBoundingClientRect();
+      var centerRect = center.getBoundingClientRect();
+      var underPath = {
+        x: centerRect.left + centerRect.width / 2 - hostRect.left,
+        y: centerRect.bottom - hostRect.top + Math.min(28, Math.max(14, centerRect.height * 0.08))
+      };
       if (packet._anim) packet._anim.cancel();
       packet.style.left = start.x + 'px';
       packet.style.top = start.y + 'px';
@@ -104,7 +109,7 @@
         { left: start.x + 'px', top: start.y + 'px', opacity: 0, transform: 'translate(-50%, -50%) scale(.72)', offset: 0 },
         { left: start.x + 'px', top: start.y + 'px', opacity: 1, transform: 'translate(-50%, -50%) scale(.9)', offset: .08 },
         { left: leftPath.x + 'px', top: leftPath.y + 'px', opacity: 1, transform: 'translate(-50%, -50%) scale(1)', offset: .32 },
-        { left: centerMid.x + 'px', top: centerMid.y + 'px', opacity: 1, transform: 'translate(-50%, -50%) scale(1.08)', offset: .52 },
+        { left: underPath.x + 'px', top: underPath.y + 'px', opacity: 1, transform: 'translate(-50%, -50%) scale(1.08)', offset: .54 },
         { left: rightPath.x + 'px', top: rightPath.y + 'px', opacity: 1, transform: 'translate(-50%, -50%) scale(1)', offset: .72 },
         { left: end.x + 'px', top: end.y + 'px', opacity: 0, transform: 'translate(-50%, -50%) scale(.82)', offset: 1 }
       ], {
