@@ -21,6 +21,7 @@
    A direct child WITHOUT data-dslk-order is simply visible from the start.
 
    v2.1: every reveal is a fade-up by default; the pop is opt-in via data-dslk-pop.
+   v2.2: replacement steps (data-dslk-hides) stay out of the flow until they land.
 
        data-dslk-order="3"     position in the reveal sequence (required to animate)
        data-dslk-delay="800"   ms to wait before this element appears
@@ -30,7 +31,9 @@
                                everything reveals with the same fade-up as messages.
        data-dslk-hides="cls"   on reveal, hide the element with that class inside
                                the same message — lets one step replace another
-                               (e.g. an approved state replacing its buttons)
+                               (e.g. an approved state replacing its buttons).
+                               The element carrying this sits at display:none until
+                               its turn, so it reserves no space beforehand.
 
    ─────────────────────────────────────────────────────────────────────────── */
 (function () {
@@ -138,6 +141,18 @@
     function typingOff(P) { if (P.typing) P.typing.classList.remove('dslk-typing-on'); }
 
     function reset() {
+      /* Elements that REPLACE another one start out of the flow entirely, not just
+         invisible — otherwise they reserve their height and leave a hole under the
+         thing they are meant to replace. Done before measuring, so the heights the
+         scroll maths uses match the pose the panel actually starts in. */
+      timeline.forEach(function (s) {
+        if (!s.hides) return;
+        var host = s.el.closest ? s.el.closest('.dslk-msg') : null;
+        var tgt = (host || document).querySelector('.' + s.hides);
+        if (tgt) { tgt.style.display = ''; }
+        s.el.style.display = 'none';
+      });
+
       panels.forEach(function (P) {
         P.list.style.transition = 'none';
         measure(P);
@@ -158,14 +173,6 @@
         typingOff(P);
       });
 
-      /* restore elements a previous cycle hid via data-dslk-hides */
-      timeline.forEach(function (s) {
-        if (!s.hides) return;
-        var host = s.el.closest ? s.el.closest('.dslk-msg') : null;
-        var tgt = (host || document).querySelector('.' + s.hides);
-        if (tgt) { tgt.style.display = ''; }
-      });
-
       /* nested details always start hidden, in the pose their reveal expects */
       timeline.forEach(function (s) {
         if (s.isMessage) return;
@@ -183,6 +190,8 @@
         var host = s.el.closest ? s.el.closest('.dslk-msg') : null;
         var tgt = (host || document).querySelector('.' + s.hides);
         if (tgt) { tgt.style.display = 'none'; }
+        s.el.style.display = '';
+        void s.el.offsetWidth;   /* flush the display change so the fade still animates */
       }
       if (s.isMessage) {
         s.P.list.style.transition = 'transform .55s cubic-bezier(.22,1,.36,1)';
