@@ -25,6 +25,11 @@
        data-dslk-typing="850"  show the typing bubble in that panel for N ms
                                immediately before this element appears
        data-dslk-pop           force the pop/scale reveal instead of the slide
+       data-dslk-fade          force the fade/slide reveal instead of the pop
+                               (use on nested details that should read as messages)
+       data-dslk-hides="cls"   on reveal, hide the element with that class inside
+                               the same message — lets one step replace another
+                               (e.g. an approved state replacing its buttons)
 
    ─────────────────────────────────────────────────────────────────────────── */
 (function () {
@@ -99,7 +104,8 @@
           order:  num(d.dslkOrder, 0),
           delay:  num(d.dslkDelay, 800),
           typing: num(d.dslkTyping, 0),
-          pop:    d.dslkPop !== undefined || i === -1
+          pop:    d.dslkPop !== undefined || (i === -1 && d.dslkFade === undefined),
+          hides:  d.dslkHides || ''
         });
       });
     });
@@ -151,6 +157,14 @@
         typingOff(P);
       });
 
+      /* restore elements a previous cycle hid via data-dslk-hides */
+      timeline.forEach(function (s) {
+        if (!s.hides) return;
+        var host = s.el.closest ? s.el.closest('.dslk-msg') : null;
+        var tgt = (host || document).querySelector('.' + s.hides);
+        if (tgt) { tgt.style.display = ''; }
+      });
+
       /* nested details always start hidden */
       timeline.forEach(function (s) {
         if (s.isMessage) return;
@@ -164,6 +178,11 @@
     }
 
     function reveal(s) {
+      if (s.hides) {
+        var host = s.el.closest ? s.el.closest('.dslk-msg') : null;
+        var tgt = (host || document).querySelector('.' + s.hides);
+        if (tgt) { tgt.style.display = 'none'; }
+      }
       if (s.isMessage) {
         s.P.list.style.transition = 'transform .55s cubic-bezier(.22,1,.36,1)';
         s.P.list.style.transform  = 'translate3d(0,' + suffix(s.P, s.i) + 'px,0)';
