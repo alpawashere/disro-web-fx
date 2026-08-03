@@ -5,11 +5,14 @@
 (function () {
   var PROD_BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/main/home/';
   var STAGING_BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/staging/ask-cortex-v2/home/';
+  var SLACK_BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/staging/slack-adidas/home/';
   var isStaging = /\.webflow\.io$/.test(window.location.hostname);
   var files = ['fonts.js', 'organigram.js', 'shine.js', 'slack.js', 'cortex.js', 'loop2-mobile.js', 'dmocks.js', 'debug.js'];
 
   files.forEach(function (f) {
-    var base = isStaging && f === 'cortex.js' ? STAGING_BASE : PROD_BASE;
+    var base = PROD_BASE;
+    if (isStaging && f === 'cortex.js') base = STAGING_BASE;
+    if (isStaging && f === 'slack.js') base = SLACK_BASE;
     fetch(base + f + '?cb=' + Date.now()).then(function (r) { return r.text(); }).then(function (t) {
       var s = document.createElement('script');
       s.textContent = t;
