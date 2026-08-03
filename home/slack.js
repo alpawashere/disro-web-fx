@@ -20,13 +20,14 @@
 
    A direct child WITHOUT data-dslk-order is simply visible from the start.
 
+   v2.1: every reveal is a fade-up by default; the pop is opt-in via data-dslk-pop.
+
        data-dslk-order="3"     position in the reveal sequence (required to animate)
        data-dslk-delay="800"   ms to wait before this element appears
        data-dslk-typing="850"  show the typing bubble in that panel for N ms
                                immediately before this element appears
-       data-dslk-pop           force the pop/scale reveal instead of the slide
-       data-dslk-fade          force the fade/slide reveal instead of the pop
-                               (use on nested details that should read as messages)
+       data-dslk-pop           opt in to the pop/scale reveal (bouncy). Without it
+                               everything reveals with the same fade-up as messages.
        data-dslk-hides="cls"   on reveal, hide the element with that class inside
                                the same message — lets one step replace another
                                (e.g. an approved state replacing its buttons)
@@ -104,7 +105,7 @@
           order:  num(d.dslkOrder, 0),
           delay:  num(d.dslkDelay, 800),
           typing: num(d.dslkTyping, 0),
-          pop:    d.dslkPop !== undefined || (i === -1 && d.dslkFade === undefined),
+          pop:    d.dslkPop !== undefined,
           hides:  d.dslkHides || ''
         });
       });
@@ -165,13 +166,13 @@
         if (tgt) { tgt.style.display = ''; }
       });
 
-      /* nested details always start hidden */
+      /* nested details always start hidden, in the pose their reveal expects */
       timeline.forEach(function (s) {
         if (s.isMessage) return;
         s.el.style.transition = 'none';
         s.el.style.animation  = 'none';
         s.el.style.opacity    = '0';
-        s.el.style.transform  = 'scale(.96)';
+        s.el.style.transform  = s.pop ? 'scale(.96)' : 'translateY(10px)';
       });
 
       if (panels[0]) void panels[0].card.offsetWidth;  /* flush so the next transitions animate */
