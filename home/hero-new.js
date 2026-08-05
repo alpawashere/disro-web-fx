@@ -153,9 +153,12 @@
 
       var css = document.createElement('style');
       css.textContent =
-        '.fh-card.fh-card-brain{transition:transform .19s cubic-bezier(.4,0,.2,1),box-shadow .19s cubic-bezier(.4,0,.2,1)}' +
-        '.fh-card.fh-brain-push{transform:scale(.986);' +
-          'box-shadow:2px 2px 7px 0 rgba(214,214,218,.85),-1.5px -1.5px 6px 0 #ffffff}' +
+        /* Asymmetric timing is what makes it read as soft: the press settles in
+           quickly, the release eases back out almost twice as slowly. Equal
+           durations in both directions feel like a click. */
+        '.fh-card.fh-card-brain{transition:transform .44s cubic-bezier(.22,.61,.36,1),box-shadow .44s cubic-bezier(.22,.61,.36,1)}' +
+        '.fh-card.fh-brain-push{transition-duration:.24s;transform:scale(.9935);' +
+          'box-shadow:4px 4px 13px 0 rgba(214,214,218,.78),-2.6px -2.6px 10px 0 #ffffff}' +
         '.fh-brain-rim{filter:drop-shadow(0 0 5px rgba(255,255,255,.95)) drop-shadow(0 0 12px rgba(255,255,255,.6))}';
       document.head.appendChild(css);
 
@@ -222,7 +225,7 @@
       return function push() {
         card.classList.add('fh-brain-push');
         clearTimeout(t);
-        t = setTimeout(function () { card.classList.remove('fh-brain-push'); }, 170);
+        t = setTimeout(function () { card.classList.remove('fh-brain-push'); }, 240);
       };
     }
 
