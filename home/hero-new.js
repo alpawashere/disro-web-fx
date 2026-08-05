@@ -1,12 +1,12 @@
-/* hero-new.js — Hero (fh-* stack). four strips + the Agency Brain trace.
-     Humans   spring stepper, 1 item per step, left-to-right
-     Agents   constant marquee, right-to-left
-     Tools    spring stepper, 3 items per step, left-to-right
-     Clients  constant marquee, right-to-left
-     Brain    stroke segment travelling the card perimeter
-   Spring constants and px/s pacing match organigram.js so both sections read as
-   one system. Overrides via data attributes on .fh-wrap:
-   data-fh-speed / data-fh-dwell / data-fh-k / data-fh-c */
+/* hero-new.js — Hero (fh-* stack): four stepped rows on one shared clock,
+   plus the Agency Brain rim.
+     Humans   1 item per step, left-to-right
+     Agents   1 item per step, right-to-left
+     Tools    3 items per step, left-to-right, centre trio in colour
+     Clients  1 item per step, right-to-left
+   Every row advances on the same beat and the Brain pulses with it.
+   Overrides via data attributes on .fh-wrap:
+   data-fh-dwell / data-fh-k / data-fh-c / data-fh-brain-lap */
 (function () {
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function ready(f) { if (document.readyState !== 'loading') f(); else document.addEventListener('DOMContentLoaded', f); }
@@ -17,9 +17,8 @@
     var cfg = root.dataset || {};
     function num(v, d) { v = parseFloat(v); return isFinite(v) ? v : d; }
 
-    var SPEED = num(cfg.fhSpeed, 120);        /* px/s, matches .dorg-cards */
-    var DWELL = num(cfg.fhDwell, 1500);       /* ms hold, matches .dorg-roles */
-    var K = num(cfg.fhK, 230), C = num(cfg.fhC, 29);
+    var PERIOD = num(cfg.fhDwell, 1800);      /* ms from one step to the next */
+    var K = num(cfg.fhK, 230), C = num(cfg.fhC, 29);   /* spring, as organigram.js */
 
     /* The rows are images — they measure 0 at DOMContentLoaded. Poll until the
        first item has width, then build. Gives up after ~3s. */
@@ -31,7 +30,6 @@
       requestAnimationFrame(function () { whenSized(track, f, tries + 1); });
     }
 
-    /* Four loops in one hero is a lot — idle them once it scrolls away. */
     function visible(el) {
       var state = { on: true };
       if (!window.IntersectionObserver) return state;
@@ -40,9 +38,9 @@
     }
 
     /* .fh-wrap is scaled down on the tiny breakpoint. getBoundingClientRect
-       reports VISUAL px, while columnGap and clientWidth report LAYOUT px —
-       mixing the two throws off the pitch. Divide every measured width by the
-       ambient scale so the whole module works in layout units. */
+       reports VISUAL px while columnGap and clientWidth report LAYOUT px —
+       mixing the two throws off the pitch. Divide measured widths by the
+       ambient scale so the module works entirely in layout units. */
     function ambientScale() {
       var w = root.offsetWidth;
       if (!w) return 1;
@@ -64,186 +62,184 @@
 
     function prep(r) {
       r.wrap.style.justifyContent = 'flex-start';
-      /* belt and braces: a row whose mask is not clipping would spill the clones
-         across the page. Does not fix a card sized with width:auto — that has to
-         be an explicit width in the Designer. */
       r.wrap.style.overflow = 'hidden';
       r.track.style.flexShrink = '0';
       r.track.style.willChange = 'transform';
     }
 
-    /* ---------- constant marquee ---------- */
-    /* speed > 0 runs right-to-left, speed < 0 runs left-to-right */
-    function marquee(name, speed) {
-      var r = setup(name); if (!r) return;
+    /* ---------- stepper: advance `by` items, hold, repeat ----------
+       dir -1 walks left-to-right, +1 walks right-to-left.
+       The spring is near critically damped (zeta ~0.96) so settle time is about
+       0.3s whatever the distance — stepping 3 travels faster, not longer, which
+       is what keeps Tools locked to the other three rows. */
+    function makeStepper(name, opts) {
+      var r = setup(name); if (!r) return null;
+      var api = {};
       whenSized(r.track, function () {
         var w = r.items[0].getBoundingClientRect().width / ambientScale();
         if (!w) return;
-        var PITCH = w + r.gap, setW = r.items.length * PITCH;
+        var n = r.items.length, PITCH = w + r.gap, SETS = 4;
         prep(r);
-        var sets = Math.ceil((r.wrap.clientWidth + 2 * setW) / setW);
-        for (var s = 1; s < sets; s++) r.items.forEach(function (c) { r.track.appendChild(c.cloneNode(true)); });
-        var vis = visible(r.wrap), x = -setW / 2, last = performance.now();
-        (function loop(now) {
-          now = now || performance.now();
-          var dt = Math.min((now - last) / 1000, 0.05);
-          last = now;
-          if (vis.on) {
-            x -= speed * dt;
-            if (x <= -setW) x += setW;
-            if (x >= 0) x -= setW;
-            r.track.style.transform = 'translate3d(' + x + 'px,0,0)';
-          }
-          requestAnimationFrame(loop);
-        })(last);
-      });
-    }
-
-    /* ---------- spring stepper: advance `by` items, hold, repeat ---------- */
-    /* The spring is near critically damped (zeta ~0.96), so settle time is about
-       0.3s whatever the distance — stepping 3 just travels faster, it does not
-       take longer. That keeps Tools and Humans on the same rhythm. */
-    function stepper(name, by, dwell) {
-      by = by || 1; dwell = dwell || DWELL;
-      var r = setup(name); if (!r) return;
-      whenSized(r.track, function () {
-        var w = r.items[0].getBoundingClientRect().width / ambientScale();
-        if (!w) return;
-        var n = r.items.length, PITCH = w + r.gap;
-        var SETS = Math.max(4, Math.ceil(by / n) + 3);
-        prep(r);
-        for (var s = 1; s < SETS; s++) r.items.forEach(function (c) { r.track.appendChild(c.cloneNode(true)); });
+        for (var s = 1; s < SETS; s++) r.items.forEach(function (c) {
+          var clone = c.cloneNode(true);
+          clone.setAttribute('aria-hidden', 'true');
+          r.track.appendChild(clone);
+        });
+        var all = [].slice.call(r.track.children);
 
         function W() { return r.wrap.clientWidth; }
         function targetFor(i) { return W() / 2 - (i * PITCH + w / 2); }
 
         var idx = Math.floor(SETS / 2) * n + Math.floor(n / 2);
-        var x = targetFor(idx), v = 0, anim = false;
+        var x = targetFor(idx), v = 0, running = false;
         r.track.style.transform = 'translate3d(' + x + 'px,0,0)';
+        if (opts.onStep) opts.onStep(idx, all);
 
-        function step() {
-          idx -= by;
-          while (idx < n) { idx += n; x -= n * PITCH; }   /* recycle, same rendered position */
-          anim = true;
-          var tg = targetFor(idx), lastT = performance.now();
+        api.step = function () {
+          idx += opts.dir * opts.by;
+          /* recycle a whole set, compensating x so nothing moves on screen */
+          while (idx < n) { idx += n; x -= n * PITCH; }
+          while (idx >= (SETS - 1) * n) { idx -= n; x += n * PITCH; }
+          if (opts.onStep) opts.onStep(idx, all);
+          if (running) return;              /* spring will chase the new target */
+          running = true;
+          var lastT = performance.now();
           (function sloop(now) {
             var dt = Math.min((now - lastT) / 1000, 0.05);
             lastT = now;
+            var tg = targetFor(idx);
             var a = K * (tg - x) - C * v;
             v += a * dt; x += v * dt;
             r.track.style.transform = 'translate3d(' + x + 'px,0,0)';
             if (Math.abs(tg - x) < 0.3 && Math.abs(v) < 6) {
-              x = tg; v = 0; anim = false;
+              x = tg; v = 0; running = false;
               r.track.style.transform = 'translate3d(' + x + 'px,0,0)';
-              setTimeout(step, dwell);
               return;
             }
             requestAnimationFrame(sloop);
           })(lastT);
-        }
+        };
 
-        setTimeout(step, dwell);
         window.addEventListener('resize', function () {
-          if (!anim) { x = targetFor(idx); r.track.style.transform = 'translate3d(' + x + 'px,0,0)'; }
+          if (!running) { x = targetFor(idx); r.track.style.transform = 'translate3d(' + x + 'px,0,0)'; }
         });
       });
+      return api;
     }
 
-    /* ---------- Agency Brain: stroke travelling the perimeter ---------- */
-    /* pathLength="100" normalises the dash maths, so the segment stays the same
-       proportion of the perimeter at every breakpoint — no resize recalculation
-       beyond the rect geometry itself. */
+    /* ---------- Tools: only the centre trio keeps its colour ---------- */
+    var toolCSS = document.createElement('style');
+    toolCSS.textContent =
+      '.fh-track-tools > *{filter:grayscale(1);transition:filter .55s ease}' +
+      '.fh-track-tools > .fh-tool-live{filter:grayscale(0)}';
+    document.head.appendChild(toolCSS);
+
+    function toolsHighlight(idx, all) {
+      all.forEach(function (el) { el.classList.remove('fh-tool-live'); });
+      for (var k = idx - 1; k <= idx + 1; k++) if (all[k]) all[k].classList.add('fh-tool-live');
+    }
+
+    /* ---------- Agency Brain: rotating rim + press ---------- */
     function brainTrace() {
       var card = root.querySelector('.fh-card-brain');
-      if (!card) return;
+      if (!card) return function () {};
       var NS = 'http://www.w3.org/2000/svg';
       if (getComputedStyle(card).position === 'static') card.style.position = 'relative';
+      /* .fh-card clips its children, which would cut the outer glow in half */
+      card.style.overflow = 'visible';
 
-      var LAP = num(cfg.fhBrainLap, 4.6);   /* seconds per lap */
-      var N = 12;                           /* segments in the tail */
-      var SEG = 2.4;                        /* length of each, in % of perimeter */
-      var LAG = 0.85;                       /* spacing between them, same units */
+      var LAP = num(cfg.fhBrainLap, 6);   /* seconds per full rotation */
+      var SW = 6;                         /* stroke width */
 
-      /* A stroke gradient in SVG is fixed in space, not along the path — it would
-         recolour the segment depending on which side of the rectangle it happens
-         to be on. So the ramp is built out of stacked segments instead: same
-         speed, each one a step further behind, fading out as it goes. That reads
-         as a comet and works identically on every edge and corner. */
-      var HEAD = [24, 24, 27], TAIL = [161, 161, 170];   /* zinc 950 -> zinc 400 */
-      function tone(t) {
-        var c = HEAD.map(function (h, i) { return Math.round(h + (TAIL[i] - h) * t); });
-        var a = 0.5 * Math.pow(1 - t, 1.7);
-        return 'rgba(' + c.join(',') + ',' + a.toFixed(3) + ')';
-      }
-
-      var frames = '';
-      for (var i = 0; i < N; i++) {
-        var o = i * LAG;
-        frames += '@keyframes fh-brain-' + i + '{from{stroke-dashoffset:' + o.toFixed(2) +
-                  '}to{stroke-dashoffset:' + (o - 100).toFixed(2) + '}}';
-      }
       var css = document.createElement('style');
-      css.textContent = frames +
-        '.fh-brain-seg{animation-duration:' + LAP + 's;animation-timing-function:linear;animation-iteration-count:infinite}' +
-        '.fh-brain-seg-0{filter:drop-shadow(0 0 4px rgba(24,24,27,0.28))}';
+      css.textContent =
+        '.fh-card.fh-card-brain{transition:transform .19s cubic-bezier(.4,0,.2,1),box-shadow .19s cubic-bezier(.4,0,.2,1)}' +
+        '.fh-card.fh-brain-push{transform:scale(.986);' +
+          'box-shadow:2px 2px 7px 0 rgba(214,214,218,.85),-1.5px -1.5px 6px 0 #ffffff}' +
+        '.fh-brain-rim{filter:drop-shadow(0 0 5px rgba(255,255,255,.95)) drop-shadow(0 0 12px rgba(255,255,255,.6))}';
       document.head.appendChild(css);
 
       var svg = document.createElementNS(NS, 'svg');
       svg.setAttribute('aria-hidden', 'true');
       svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;';
 
-      var rects = [];
-      function rect(stroke, dash, width, cls) {
-        var el = document.createElementNS(NS, 'rect');
-        el.setAttribute('fill', 'none');
-        el.setAttribute('stroke', stroke);
-        el.setAttribute('stroke-width', width);
-        el.setAttribute('stroke-linecap', 'round');
-        el.setAttribute('pathLength', '100');
-        if (dash) el.setAttribute('stroke-dasharray', dash);
-        if (cls) el.setAttribute('class', cls);
-        svg.appendChild(el);
-        rects.push(el);
-        return el;
-      }
+      var defs = document.createElementNS(NS, 'defs');
+      var grad = document.createElementNS(NS, 'linearGradient');
+      grad.setAttribute('id', 'fh-brain-grad');
+      grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+      /* white -> E2E2E2 -> white, so the ramp meets itself and the rotation has
+         no seam. objectBoundingBox would skew the spin on a wide box, hence
+         userSpaceOnUse with coordinates refreshed in geom(). */
+      [['0%', '#ffffff'], ['50%', '#E2E2E2'], ['100%', '#ffffff']].forEach(function (s) {
+        var stop = document.createElementNS(NS, 'stop');
+        stop.setAttribute('offset', s[0]);
+        stop.setAttribute('stop-color', s[1]);
+        grad.appendChild(stop);
+      });
+      defs.appendChild(grad);
+      svg.appendChild(defs);
 
-      rect('rgba(40,40,40,0.09)', null, 2);   /* the rail the head runs on */
+      var rim = document.createElementNS(NS, 'rect');
+      rim.setAttribute('fill', 'none');
+      rim.setAttribute('stroke', 'url(#fh-brain-grad)');
+      rim.setAttribute('stroke-width', SW);
+      rim.setAttribute('class', 'fh-brain-rim');
+      svg.appendChild(rim);
 
-      /* tail first so the head paints on top */
-      for (var j = N - 1; j >= 0; j--) {
-        var t = j / (N - 1);
-        var el = rect(tone(t), SEG.toFixed(2) + ' ' + (100 - SEG).toFixed(2),
-                      (2.1 - 0.5 * t).toFixed(2),
-                      'fh-brain-seg fh-brain-seg-' + j);
-        el.style.animationName = 'fh-brain-' + j;
-      }
-
+      var spin = null;
       function geom() {
-        /* offsetWidth/Height, not getBoundingClientRect: the rect returns the
-           VISUAL size, so any transform:scale on a parent (the hero is scaled
-           down on mobile) would shrink the numbers while the SVG viewport stays
-           at layout size — the trace ends up small and pinned top-left. */
-        var w = card.offsetWidth, h = card.offsetHeight;
+        var w = card.offsetWidth, h = card.offsetHeight;   /* layout px, ignores transforms */
+        if (!w || !h) return;
         var r = parseFloat(getComputedStyle(card).borderTopLeftRadius) || 0;
-        rects.forEach(function (el) {
-          el.setAttribute('x', 1);
-          el.setAttribute('y', 1);
-          el.setAttribute('width', Math.max(0, w - 2));
-          el.setAttribute('height', Math.max(0, h - 2));
-          el.setAttribute('rx', Math.max(0, r - 1));
-        });
+        var i = SW / 2;
+        rim.setAttribute('x', i);
+        rim.setAttribute('y', i);
+        rim.setAttribute('width', Math.max(0, w - SW));
+        rim.setAttribute('height', Math.max(0, h - SW));
+        rim.setAttribute('rx', Math.max(0, r - i));
+
+        var cx = w / 2, cy = h / 2, R = Math.sqrt(w * w + h * h) / 2;
+        grad.setAttribute('x1', cx - R); grad.setAttribute('y1', cy);
+        grad.setAttribute('x2', cx + R); grad.setAttribute('y2', cy);
+
+        if (spin) grad.removeChild(spin);
+        spin = document.createElementNS(NS, 'animateTransform');
+        spin.setAttribute('attributeName', 'gradientTransform');
+        spin.setAttribute('type', 'rotate');
+        spin.setAttribute('from', '0 ' + cx + ' ' + cy);
+        spin.setAttribute('to', '360 ' + cx + ' ' + cy);
+        spin.setAttribute('dur', LAP + 's');
+        spin.setAttribute('repeatCount', 'indefinite');
+        grad.appendChild(spin);
       }
 
       card.appendChild(svg);
       geom();
       if (window.ResizeObserver) new ResizeObserver(geom).observe(card);
       else window.addEventListener('resize', geom);
+
+      var t = null;
+      return function push() {
+        card.classList.add('fh-brain-push');
+        clearTimeout(t);
+        t = setTimeout(function () { card.classList.remove('fh-brain-push'); }, 170);
+      };
     }
 
-    stepper('humans', 1);
-    marquee('agents', SPEED);
-    stepper('tools', 3);
-    marquee('clients', SPEED * 0.75);
-    brainTrace();
+    /* ---------- one clock for everything ---------- */
+    var rows = [
+      makeStepper('humans',  { by: 1, dir: -1 }),
+      makeStepper('agents',  { by: 1, dir:  1 }),
+      makeStepper('tools',   { by: 3, dir: -1, onStep: toolsHighlight }),
+      makeStepper('clients', { by: 1, dir:  1 })
+    ];
+    var pushBrain = brainTrace();
+    var vis = visible(root);
+
+    setInterval(function () {
+      if (!vis.on || document.hidden) return;
+      rows.forEach(function (s) { if (s && s.step) s.step(); });
+      pushBrain();
+    }, PERIOD);
   });
 })();
