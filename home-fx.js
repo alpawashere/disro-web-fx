@@ -7,7 +7,7 @@
   var STAGING_BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/staging/ask-cortex-v2/home/';
   var SLACK_BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/staging/slack-adidas/home/';
   var isStaging = /\.webflow\.io$/.test(window.location.hostname);
-  var files = ['fonts.js', 'organigram.js', 'shine.js', 'slack.js', 'cortex.js', 'loop2-mobile.js', 'dmocks.js', 'debug.js'];
+  var files = ['fonts.js', 'organigram.js', 'shine.js', 'slack.js', 'cortex.js', 'loop2-mobile.js', 'dmocks.js', 'debug.js', 'hero-new.js'];
 
   files.forEach(function (f) {
     var base = PROD_BASE;
