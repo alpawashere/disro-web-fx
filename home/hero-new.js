@@ -39,6 +39,17 @@
       return state;
     }
 
+    /* .fh-wrap is scaled down on the tiny breakpoint. getBoundingClientRect
+       reports VISUAL px, while columnGap and clientWidth report LAYOUT px —
+       mixing the two throws off the pitch. Divide every measured width by the
+       ambient scale so the whole module works in layout units. */
+    function ambientScale() {
+      var w = root.offsetWidth;
+      if (!w) return 1;
+      var s = root.getBoundingClientRect().width / w;
+      return s > 0.01 ? s : 1;
+    }
+
     function setup(name) {
       var wrap = root.querySelector('.fh-mask-' + name);
       var track = wrap && wrap.querySelector('.fh-track-' + name);
@@ -66,7 +77,7 @@
     function marquee(name, speed) {
       var r = setup(name); if (!r) return;
       whenSized(r.track, function () {
-        var w = r.items[0].getBoundingClientRect().width;
+        var w = r.items[0].getBoundingClientRect().width / ambientScale();
         if (!w) return;
         var PITCH = w + r.gap, setW = r.items.length * PITCH;
         prep(r);
@@ -96,7 +107,7 @@
       by = by || 1; dwell = dwell || DWELL;
       var r = setup(name); if (!r) return;
       whenSized(r.track, function () {
-        var w = r.items[0].getBoundingClientRect().width;
+        var w = r.items[0].getBoundingClientRect().width / ambientScale();
         if (!w) return;
         var n = r.items.length, PITCH = w + r.gap;
         var SETS = Math.max(4, Math.ceil(by / n) + 3);
@@ -208,13 +219,17 @@
       }
 
       function geom() {
-        var b = card.getBoundingClientRect();
+        /* offsetWidth/Height, not getBoundingClientRect: the rect returns the
+           VISUAL size, so any transform:scale on a parent (the hero is scaled
+           down on mobile) would shrink the numbers while the SVG viewport stays
+           at layout size — the trace ends up small and pinned top-left. */
+        var w = card.offsetWidth, h = card.offsetHeight;
         var r = parseFloat(getComputedStyle(card).borderTopLeftRadius) || 0;
         rects.forEach(function (el) {
           el.setAttribute('x', 1);
           el.setAttribute('y', 1);
-          el.setAttribute('width', Math.max(0, b.width - 2));
-          el.setAttribute('height', Math.max(0, b.height - 2));
+          el.setAttribute('width', Math.max(0, w - 2));
+          el.setAttribute('height', Math.max(0, h - 2));
           el.setAttribute('rx', Math.max(0, r - 1));
         });
       }
