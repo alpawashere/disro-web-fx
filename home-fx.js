@@ -6,7 +6,9 @@
   var PROD_BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/main/home/';
   var STAGING_BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/staging/ask-cortex-v2/home/';
   var SLACK_BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/staging/slack-adidas/home/';
-  var HERO_ALT_BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/staging/home-wip-hero/home/';
+  /* Encode the slash in the branch ref; otherwise raw.githubusercontent.com
+     interprets `home-wip-hero` as the first directory in the file path. */
+  var HERO_ALT_BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/staging%2Fhome-wip-hero/home/';
   var isStaging = /\.webflow\.io$/.test(window.location.hostname);
   var isHomeWip = window.location.pathname.replace(/\/+$/, '') === '/home-wip';
   var useAltHero = isStaging && isHomeWip && new URLSearchParams(window.location.search).get('hero') === 'alt';
