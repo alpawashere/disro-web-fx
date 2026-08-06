@@ -1,12 +1,11 @@
-/* hero-new.js — Hero (fh-* stack): four stepped rows on one shared clock,
+/* hero-new.js — Alternative Home-WIP hero: four continuous marquee rows,
    plus the Agency Brain rim.
-     Humans   1 item per step, left-to-right
-     Agents   1 item per step, right-to-left
-     Tools    3 items per step, left-to-right, centre trio in colour
-     Clients  1 item per step, right-to-left
-   Every row advances on the same beat and the Brain pulses with it.
-   Overrides via data attributes on .fh-wrap:
-   data-fh-dwell / data-fh-k / data-fh-c / data-fh-brain-lap */
+     Humans   left-to-right
+     Agents   right-to-left
+     Tools    left-to-right, gaining their original colour at centre
+     Clients  right-to-left
+   Overrides on .fh-wrap: data-fh-speed / data-fh-<row>-speed /
+   data-fh-color-radius / data-fh-brain-lap */
 (function () {
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function ready(f) { if (document.readyState !== 'loading') f(); else document.addEventListener('DOMContentLoaded', f); }
@@ -14,11 +13,11 @@
     if (REDUCED) return;
     var root = document.querySelector('.fh-wrap');
     if (!root) return;
+    if (root.getAttribute('data-fh-continuous-ready') === 'true') return;
+    root.setAttribute('data-fh-continuous-ready', 'true');
     var cfg = root.dataset || {};
     function num(v, d) { v = parseFloat(v); return isFinite(v) ? v : d; }
-
-    var PERIOD = num(cfg.fhDwell, 1800);      /* ms from one step to the next */
-    var K = num(cfg.fhK, 230), C = num(cfg.fhC, 29);   /* spring, as organigram.js */
+    var SPEED = Math.max(1, num(cfg.fhSpeed, 42));
 
     /* The rows are images — they measure 0 at DOMContentLoaded. Poll until the
        first item has width, then build. Gives up after ~3s. */
@@ -28,13 +27,6 @@
       if (first && first.getBoundingClientRect().width > 0) return f();
       if (tries > 180) return;
       requestAnimationFrame(function () { whenSized(track, f, tries + 1); });
-    }
-
-    function visible(el) {
-      var state = { on: true };
-      if (!window.IntersectionObserver) return state;
-      new IntersectionObserver(function (e) { state.on = e[0].isIntersecting; }, { threshold: 0 }).observe(el);
-      return state;
     }
 
     /* .fh-wrap is scaled down on the tiny breakpoint. getBoundingClientRect
@@ -67,77 +59,65 @@
       r.track.style.willChange = 'transform';
     }
 
-    /* ---------- stepper: advance `by` items, hold, repeat ----------
-       dir -1 walks left-to-right, +1 walks right-to-left.
-       The spring is near critically damped (zeta ~0.96) so settle time is about
-       0.3s whatever the distance — stepping 3 travels faster, not longer, which
-       is what keeps Tools locked to the other three rows. */
-    function makeStepper(name, opts) {
+    /* Duplicate whole sets and translate by exactly one set length. Resetting
+       the phase is invisible because the repeated pixels are identical. All
+       coordinates stay in layout pixels so the small-screen scale remains safe. */
+    function makeMarquee(name, direction, colorTools) {
       var r = setup(name); if (!r) return null;
-      var api = {};
+      var api = { ready: false, phase: 0 };
       whenSized(r.track, function () {
         var w = r.items[0].getBoundingClientRect().width / ambientScale();
         if (!w) return;
-        var n = r.items.length, PITCH = w + r.gap, SETS = 4;
+        var n = r.items.length, pitch = w + r.gap, loop = n * pitch;
+        var sets = Math.max(5, Math.ceil(r.wrap.clientWidth / loop) + 4);
+        if (sets % 2 === 0) sets += 1;
         prep(r);
-        for (var s = 1; s < SETS; s++) r.items.forEach(function (c) {
+        for (var s = 1; s < sets; s++) r.items.forEach(function (c) {
           var clone = c.cloneNode(true);
           clone.setAttribute('aria-hidden', 'true');
           r.track.appendChild(clone);
         });
         var all = [].slice.call(r.track.children);
+        var middleItem = Math.floor(sets / 2) * n + Math.floor(n / 2);
+        var base = 0;
+        function measure() {
+          w = r.items[0].getBoundingClientRect().width / ambientScale();
+          r.gap = parseFloat(getComputedStyle(r.track).columnGap) || 0;
+          pitch = w + r.gap;
+          loop = n * pitch;
+          base = r.wrap.clientWidth / 2 - (middleItem * pitch + w / 2);
+        }
+        measure();
 
-        function W() { return r.wrap.clientWidth; }
-        function targetFor(i) { return W() / 2 - (i * PITCH + w / 2); }
-
-        var idx = Math.floor(SETS / 2) * n + Math.floor(n / 2);
-        var x = targetFor(idx), v = 0, running = false;
-        r.track.style.transform = 'translate3d(' + x + 'px,0,0)';
-        if (opts.onStep) opts.onStep(idx, all);
-
-        api.step = function () {
-          idx += opts.dir * opts.by;
-          /* recycle a whole set, compensating x so nothing moves on screen */
-          while (idx < n) { idx += n; x -= n * PITCH; }
-          while (idx >= (SETS - 1) * n) { idx -= n; x += n * PITCH; }
-          if (opts.onStep) opts.onStep(idx, all);
-          if (running) return;              /* spring will chase the new target */
-          running = true;
-          var lastT = performance.now();
-          (function sloop(now) {
-            var dt = Math.min((now - lastT) / 1000, 0.05);
-            lastT = now;
-            var tg = targetFor(idx);
-            var a = K * (tg - x) - C * v;
-            v += a * dt; x += v * dt;
-            r.track.style.transform = 'translate3d(' + x + 'px,0,0)';
-            if (Math.abs(tg - x) < 0.3 && Math.abs(v) < 6) {
-              x = tg; v = 0; running = false;
-              r.track.style.transform = 'translate3d(' + x + 'px,0,0)';
-              return;
-            }
-            requestAnimationFrame(sloop);
-          })(lastT);
+        api.speed = Math.max(1, num(cfg['fh' + name.charAt(0).toUpperCase() + name.slice(1) + 'Speed'], SPEED));
+        api.render = function () {
+          var x = base + direction * api.phase;
+          r.track.style.transform = 'translate3d(' + x.toFixed(3) + 'px,0,0)';
+          if (!colorTools) return;
+          var centre = r.wrap.clientWidth / 2;
+          var radius = Math.max(1, num(cfg.fhColorRadius, pitch * 1.25));
+          all.forEach(function (el, i) {
+            var distance = Math.abs(x + i * pitch + w / 2 - centre);
+            var t = Math.max(0, Math.min(1, 1 - distance / radius));
+            var colour = t * t * (3 - 2 * t); /* smoothstep in and back out */
+            el.style.filter = 'grayscale(' + (1 - colour).toFixed(3) + ')';
+          });
         };
-
-        window.addEventListener('resize', function () {
-          if (!running) { x = targetFor(idx); r.track.style.transform = 'translate3d(' + x + 'px,0,0)'; }
-        });
+        api.advance = function (dt) {
+          api.phase = (api.phase + api.speed * dt) % loop;
+          api.render();
+        };
+        window.addEventListener('resize', function () { measure(); api.render(); });
+        api.ready = true;
+        api.render();
       });
       return api;
     }
 
-    /* ---------- Tools: only the centre trio keeps its colour ---------- */
+    /* Tools keep their white tiles and black artwork away from centre. */
     var toolCSS = document.createElement('style');
-    toolCSS.textContent =
-      '.fh-track-tools > *{filter:grayscale(1);transition:filter .55s ease}' +
-      '.fh-track-tools > .fh-tool-live{filter:grayscale(0)}';
+    toolCSS.textContent = '.fh-track-tools > *{filter:grayscale(1);will-change:filter}';
     document.head.appendChild(toolCSS);
-
-    function toolsHighlight(idx, all) {
-      all.forEach(function (el) { el.classList.remove('fh-tool-live'); });
-      for (var k = idx - 1; k <= idx + 1; k++) if (all[k]) all[k].classList.add('fh-tool-live');
-    }
 
     /* ---------- Agency Brain: rotating rim + press ---------- */
     function brainTrace() {
@@ -242,20 +222,26 @@
       };
     }
 
-    /* ---------- one clock for everything ---------- */
+    /* ---------- one time-based clock for every row ---------- */
     var rows = [
-      makeStepper('humans',  { by: 1, dir: -1 }),
-      makeStepper('agents',  { by: 1, dir:  1 }),
-      makeStepper('tools',   { by: 3, dir: -1, onStep: toolsHighlight }),
-      makeStepper('clients', { by: 1, dir:  1 })
+      makeMarquee('humans',   1, false),
+      makeMarquee('agents',  -1, false),
+      makeMarquee('tools',    1, true),
+      makeMarquee('clients', -1, false)
     ];
     var pushBrain = brainTrace();
-    var vis = visible(root);
-
-    setInterval(function () {
-      if (!vis.on || document.hidden) return;
-      rows.forEach(function (s) { if (s && s.step) s.step(); });
-      pushBrain();
-    }, PERIOD);
+    var onScreen = true, last = performance.now(), lastPush = last;
+    if (window.IntersectionObserver) {
+      new IntersectionObserver(function (e) { onScreen = e[0].isIntersecting; }).observe(root);
+    }
+    (function tick(now) {
+      var dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      if (onScreen && !document.hidden) {
+        rows.forEach(function (row) { if (row && row.ready) row.advance(dt); });
+        if (now - lastPush >= 1800) { pushBrain(); lastPush = now; }
+      }
+      requestAnimationFrame(tick);
+    })(last);
   });
 })();
