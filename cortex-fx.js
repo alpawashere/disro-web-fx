@@ -3,7 +3,7 @@
    so one module error cannot take down the page. */
 (function () {
   var BASE = 'https://raw.githubusercontent.com/alpawashere/disro-web-fx/main/cortex/';
-  ['hero.js', 'google-icons.js'].forEach(function (f) {
+  ['hero.js', 'google-icons-v2.js'].forEach(function (f) {
     fetch(BASE + f + '?cb=' + Date.now()).then(function (r) { return r.text(); }).then(function (t) {
       var s = document.createElement('script');
       s.textContent = t;
