@@ -22,6 +22,8 @@
 
    v2.1: every reveal is a fade-up by default; the pop is opt-in via data-dslk-pop.
    v2.2: replacement steps (data-dslk-hides) stay out of the flow until they land.
+   v2.3: light mode. The typing bubble is repainted for the light Slack UI and is
+         offset above the home indicator now that each panel sits in an iPhone frame.
 
        data-dslk-order="3"     position in the reveal sequence (required to animate)
        data-dslk-delay="800"   ms to wait before this element appears
@@ -63,11 +65,12 @@
     st.textContent =
       '@keyframes dslkPop{0%{transform:scale(0)}70%{transform:scale(1.18)}100%{transform:scale(1)}}' +
       '@keyframes dslkDot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-3px);opacity:1}}' +
-      '.dslk-typing{position:absolute;left:16px;display:flex;gap:4px;align-items:center;background:#222529;' +
-        'border:0.89px solid #434545;border-radius:8px;padding:6px 9px;opacity:0;' +
+      '.dslk-typing{position:absolute;left:16px;display:flex;gap:4px;align-items:center;background:#fff;' +
+        'border:0.89px solid #e2e2e2;border-radius:9.38px;padding:6px 9px;opacity:0;' +
+        'box-shadow:0 2px 6px 0 rgba(29,31,35,.06);' +
         'transition:opacity .25s ease;z-index:3;pointer-events:none}' +
       '.dslk-typing-on{opacity:1}' +
-      '.dslk-tdot{width:5px;height:5px;border-radius:50%;background:#b0b1b4;animation:dslkDot 1.1s infinite}' +
+      '.dslk-tdot{width:5px;height:5px;border-radius:50%;background:#8b8e90;animation:dslkDot 1.1s infinite}' +
       '.dslk-td2{animation-delay:.15s}.dslk-td3{animation-delay:.3s}';
     document.head.appendChild(st);
 
@@ -84,7 +87,11 @@
         '<div class="dslk-tdot"></div>' +
         '<div class="dslk-tdot dslk-td2"></div>' +
         '<div class="dslk-tdot dslk-td3"></div>';
-      typing.style.bottom = ((comp ? comp.offsetHeight : 60) + 10) + 'px';
+      /* the panel is an iPhone screen now: the composer is no longer the last
+         thing in the card, the home indicator sits under it. */
+      var home = P.card.querySelector('.dslk-home');
+      typing.style.bottom =
+        ((comp ? comp.offsetHeight : 60) + (home ? home.offsetHeight : 0) + 10) + 'px';
       P.card.appendChild(typing);
 
       P.typing = typing;
