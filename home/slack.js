@@ -40,6 +40,7 @@
    ─────────────────────────────────────────────────────────────────────────── */
 (function () {
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var MOBILE = window.matchMedia && window.matchMedia('(max-width: 767px)').matches;
 
   function ready(f) {
     if (document.readyState !== 'loading') f();
@@ -58,7 +59,9 @@
 
     function num(v, d) { v = parseFloat(v); return isFinite(v) ? v : d; }
 
+    var SPEED = MOBILE ? 0.7 : 1;
     var HOLD = num((root.dataset || {}).dslkHold, 4000);
+    if (MOBILE) HOLD = Math.min(HOLD, 6000);
 
     /* ---------- injected styles: typing bubble + pop keyframes ---------- */
     var st = document.createElement('style');
@@ -113,8 +116,8 @@
           i: i,
           isMessage: i !== -1,
           order:  num(d.dslkOrder, 0),
-          delay:  num(d.dslkDelay, 800),
-          typing: num(d.dslkTyping, 0),
+          delay:  num(d.dslkDelay, 800) * SPEED,
+          typing: num(d.dslkTyping, 0) * SPEED,
           pop:    d.dslkPop !== undefined,
           hides:  d.dslkHides || ''
         });
@@ -273,18 +276,19 @@
     }
 
     if ('IntersectionObserver' in window) {
+      var START_RATIO = MOBILE ? 0.1 : 0.3;
       new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
-          /* start at >=0.3 visible; stop ONLY when fully out
-             (mobile URL-bar resizes make the ratio flap) */
-          if (e.isIntersecting && e.intersectionRatio >= 0.3) {
+          /* Mobile starts earlier because the phone mockups are tall relative to
+             the viewport; stop ONLY when fully out so URL-bar resizes do not flap. */
+          if (e.isIntersecting && e.intersectionRatio >= START_RATIO) {
             if (document.fonts && document.fonts.ready) document.fonts.ready.then(start);
             else start();
           } else if (!e.isIntersecting) {
             stop();
           }
         });
-      }, { threshold: [0, 0.3] }).observe(root);
+      }, { threshold: [0, START_RATIO] }).observe(root);
     } else {
       start();
     }
