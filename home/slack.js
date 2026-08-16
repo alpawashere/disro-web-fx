@@ -59,9 +59,9 @@
 
     function num(v, d) { v = parseFloat(v); return isFinite(v) ? v : d; }
 
-    var SPEED = MOBILE ? 0.7 : 1;
+    var SPEED = MOBILE ? 0.85 : 1;
     var HOLD = num((root.dataset || {}).dslkHold, 4000);
-    if (MOBILE) HOLD = Math.min(HOLD, 6000);
+    if (MOBILE) HOLD = Math.min(HOLD, 7500);
 
     /* ---------- injected styles: typing bubble + pop keyframes ---------- */
     var st = document.createElement('style');
@@ -276,7 +276,7 @@
     }
 
     if ('IntersectionObserver' in window) {
-      var START_RATIO = MOBILE ? 0.1 : 0.3;
+      var START_RATIO = MOBILE ? 0.2 : 0.3;
       new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           /* Mobile starts earlier because the phone mockups are tall relative to
